@@ -50,6 +50,8 @@ private:
     int _system_id;
     int _comp_id;
     std::map<int, CameraComponent *> compIdToObj;
+    uint8_t video_status;
+
 
     void _message_received(const struct sockaddr_in &sockaddr, const struct buffer &buf);
     void _handle_mavlink_message(const struct sockaddr_in &addr, mavlink_message_t *msg);
