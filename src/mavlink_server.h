@@ -50,6 +50,9 @@ private:
     int _system_id;
     int _comp_id;
     std::map<int, CameraComponent *> compIdToObj;
+    uint8_t video_status;
+    int _tilt;
+
 
     void _message_received(const struct sockaddr_in &sockaddr, const struct buffer &buf);
     void _handle_mavlink_message(const struct sockaddr_in &addr, mavlink_message_t *msg);
@@ -63,6 +66,7 @@ private:
                                                         mavlink_command_long_t &cmd);
     void _handle_image_start_capture(const struct sockaddr_in &addr, mavlink_command_long_t &cmd);
     void _handle_image_stop_capture(const struct sockaddr_in &addr, mavlink_command_long_t &cmd);
+    void _handle_request_video_stream_information(const sockaddr_in&, mavlink_command_long_t&);
     void _handle_video_start_capture(const struct sockaddr_in &addr, mavlink_command_long_t &cmd);
     void _handle_video_stop_capture(const struct sockaddr_in &addr, mavlink_command_long_t &cmd);
     void _image_captured_cb(image_callback_t cb_data, int result, int seq_num);
@@ -72,6 +76,7 @@ private:
     void _handle_param_ext_request_list(const struct sockaddr_in &addr, mavlink_message_t *msg);
     void _handle_param_ext_set(const struct sockaddr_in &addr, mavlink_message_t *msg);
     void _handle_reset_camera_settings(const struct sockaddr_in &addr, mavlink_command_long_t &cmd);
+    void _handle_camera_zoom(const struct sockaddr_in &addr, mavlink_command_long_t &cmd);
     void _handle_heartbeat(const struct sockaddr_in &addr, mavlink_message_t *msg);
     bool _send_camera_capture_status(int compid, const struct sockaddr_in &addr);
     bool _send_mavlink_message(const struct sockaddr_in *addr, mavlink_message_t &msg);

@@ -231,17 +231,12 @@ void CameraComponent::getImageCaptureStatus(uint8_t &status, int &interval)
     // get interval
     interval = mImgCap->getInterval();
     switch (mImgCap->getState()) {
+    case ImageCapture::STATE_RUN:
+        status = (interval > 0) ? 3 : 1;
+        break;
     case ImageCapture::STATE_ERROR:
     case ImageCapture::STATE_IDLE:
     case ImageCapture::STATE_INIT:
-        status = 0;
-        break;
-    case ImageCapture::STATE_RUN:
-        if (interval > 0)
-            status = 3; // or 2?
-        else
-            status = 1;
-        break;
     default:
         status = 0;
         break;
@@ -327,6 +322,7 @@ int CameraComponent::setVideoCaptureSettings(VideoSettings &vidSetting)
 
 int CameraComponent::startVideoCapture(int status_freq)
 {
+    log_info("CAMERA_CAPTURE_STATUS frequency %1d", status_freq);
     int ret = 0;
 
     if (mVidCap)
@@ -372,20 +368,18 @@ int CameraComponent::stopVideoCapture()
 /* 0: idle, 1: capture in progress */
 uint8_t CameraComponent::getVideoCaptureStatus()
 {
-    uint8_t ret = 0;
-
     if (!mVidCap)
         return 0;
 
+    uint8_t ret = 0;
+
     switch (mVidCap->getState()) {
-    case VideoCapture::STATE_ERROR:
-    case VideoCapture::STATE_IDLE:
-    case VideoCapture::STATE_INIT:
-        ret = 0;
-        break;
     case VideoCapture::STATE_RUN:
         ret = 1;
         break;
+    case VideoCapture::STATE_ERROR:
+    case VideoCapture::STATE_IDLE:
+    case VideoCapture::STATE_INIT:
     default:
         ret = 0;
         break;
