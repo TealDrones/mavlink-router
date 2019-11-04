@@ -509,11 +509,18 @@ bool Mainloop::add_endpoints(Mainloop &mainloop, struct options *opt)
                 return false;
             }
 
-            if (conf->filter) {
-                char *token = strtok(conf->filter, ",");
-                while (token != nullptr) {
-                    udp->add_message_to_filter(atoi(token));
-                    token = strtok(nullptr, ",");
+            if (conf->filter_inc) {
+                char *token = strtok(conf->filter_inc, ",");
+                while (token != NULL) {
+                    udp->add_message_to_inclusive_filter(atoi(token));
+                    token = strtok(NULL, ",");
+                } 
+            }
+            if (conf->filter_exc) {
+                char *token = strtok(conf->filter_exc, ",");
+                while (token != NULL) {
+                    udp->add_message_to_exclusive_filter(atoi(token));
+                    token = strtok(NULL, ",");
                 } 
             }
 

@@ -327,10 +327,17 @@ bool Endpoint::accept_msg(int target_sysid, int target_compid, uint8_t src_sysid
         return false;
 
     if (msg_id != UINT32_MAX && 
-        _message_filter.size() > 0 && 
-        std::find(_message_filter.begin(), _message_filter.end(), msg_id) == _message_filter.end()) {
+        _message_filter_inclusive.size() > 0 && 
+        std::find(_message_filter_inclusive.begin(), _message_filter_inclusive.end(), msg_id) == _message_filter_inclusive.end()) {
 
-        // if filter is defined and message is not in the set then discard it
+        // if inclusive filter is defined and message is not in the set then discard it
+        return false;
+    }
+    if (msg_id != UINT32_MAX && 
+        _message_filter_exclusive.size() > 0 && 
+        std::find(_message_filter_exclusive.begin(), _message_filter_exclusive.end(), msg_id) != _message_filter_exclusive.end()) {
+
+        // if exclusive filter is defined and message is in the set then discard it
         return false;
     }
 

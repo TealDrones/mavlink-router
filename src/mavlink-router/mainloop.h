@@ -129,7 +129,8 @@ struct endpoint_config {
             bool flowcontrol;
         };
     };
-    char *filter;
+    char *filter_inc;
+    char *filter_exc;
 };
 
 struct options {

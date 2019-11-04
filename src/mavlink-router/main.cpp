@@ -212,7 +212,8 @@ fail:
 }
 
 static int add_endpoint_address(const char *name, size_t name_len, const char *ip,
-                                long unsigned port, bool eavesdropping, const char *filter)
+                                long unsigned port, bool eavesdropping,
+                                const char *filter_inc, const char *filter_exc)
 {
     int ret;
 
@@ -223,7 +224,7 @@ static int add_endpoint_address(const char *name, size_t name_len, const char *i
     conf->type = Udp;
     conf->port = ULONG_MAX;
 
-    if (name) {
+    if (!conf->name && name) {
         conf->name = strndup(name, name_len);
         if (!conf->name) {
             ret = -ENOMEM;
@@ -231,15 +232,31 @@ static int add_endpoint_address(const char *name, size_t name_len, const char *i
         }
     }
 
-    conf->address = strdup(ip);
+    if (ip) {
+        free(conf->address);
+        conf->address = strdup(ip);
+        if (!conf->address) {
+            ret = -ENOMEM;
+            goto fail;
+        }
+    }
+
     if (!conf->address) {
-        ret = -ENOMEM;
+        ret = -EINVAL;
         goto fail;
     }
     
-    if (filter) {
-        conf->filter = strdup(filter);
-        if (!conf->filter) {
+    if (filter_inc) {
+        conf->filter_inc = strdup(filter_inc);
+        if (!conf->filter_inc) {
+            ret = -ENOMEM;
+            goto fail;
+        }
+    }
+
+    if (filter_exc) {
+        conf->filter_exc = strdup(filter_exc);
+        if (!conf->filter_exc) {
             ret = -ENOMEM;
             goto fail;
         }
@@ -410,7 +427,7 @@ static int parse_argv(int argc, char *argv[])
                 return -EINVAL;
             }
 
-            add_endpoint_address(NULL, 0, ip, port, false, NULL);
+            add_endpoint_address(NULL, 0, ip, port, false, NULL, NULL);
             free(ip);
             break;
         }
@@ -500,7 +517,7 @@ static int parse_argv(int argc, char *argv[])
                 return -EINVAL;
             }
 
-            add_endpoint_address(NULL, 0, base, number, true, NULL);
+            add_endpoint_address(NULL, 0, base, number, true, NULL, NULL);
         } else {
             const char *bauds = number != ULONG_MAX ? base + strlen(base) + 1 : NULL;
             int ret = add_uart_endpoint(NULL, 0, base, bauds, false);
@@ -686,13 +703,15 @@ static int parse_confs(ConfFile &conf)
         char *addr;
         bool eavesdropping;
         unsigned long port;
-        char *filter;
+        char *filter_inc;
+        char *filter_exc;
     };
     static const ConfFile::OptionsTable option_table_udp[] = {
-        {"address", true,   ConfFile::parse_str_dup,    OPTIONS_TABLE_STRUCT_FIELD(option_udp, addr)},
-        {"mode",    true,   parse_mode,                 OPTIONS_TABLE_STRUCT_FIELD(option_udp, eavesdropping)},
-        {"port",    false,  ConfFile::parse_ul,         OPTIONS_TABLE_STRUCT_FIELD(option_udp, port)},
-        {"filter",  false,  ConfFile::parse_str_dup,    OPTIONS_TABLE_STRUCT_FIELD(option_udp, filter)},
+        {"address",    true,   ConfFile::parse_str_dup,    OPTIONS_TABLE_STRUCT_FIELD(option_udp, addr)},
+        {"mode",       true,   parse_mode,                 OPTIONS_TABLE_STRUCT_FIELD(option_udp, eavesdropping)},
+        {"port",       false,  ConfFile::parse_ul,         OPTIONS_TABLE_STRUCT_FIELD(option_udp, port)},
+        {"filter",     false,  ConfFile::parse_str_dup,    OPTIONS_TABLE_STRUCT_FIELD(option_udp, filter_inc)},
+        {"filter_exc", false,  ConfFile::parse_str_dup,    OPTIONS_TABLE_STRUCT_FIELD(option_udp, filter_exc)},
     };
 
     struct option_tcp {
@@ -738,7 +757,7 @@ static int parse_confs(ConfFile &conf)
                 ret = -EINVAL;
             } else {
                 ret = add_endpoint_address(iter.name + offset, iter.name_len - offset, opt_udp.addr,
-                                           opt_udp.port, opt_udp.eavesdropping, opt_udp.filter);
+                                           opt_udp.port, opt_udp.eavesdropping, opt_udp.filter_inc, opt_udp.filter_exc);
             }
         }
 

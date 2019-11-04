@@ -98,7 +98,9 @@ public:
 
     bool accept_msg(int target_sysid, int target_compid, uint8_t src_sysid, uint8_t src_compid, uint32_t msg_id);
 
-    void add_message_to_filter(uint32_t msg_id) { _message_filter.push_back(msg_id); }
+    void add_message_to_inclusive_filter(uint32_t msg_id) { _message_filter_inclusive.push_back(msg_id); }
+
+    void add_message_to_exclusive_filter(uint32_t msg_id) { _message_filter_exclusive.push_back(msg_id); }
 
     void start_expire_timer();
 
@@ -141,7 +143,8 @@ protected:
 
 private:
     Timeout* _expire_timer = nullptr;
-    std::vector<uint32_t> _message_filter;
+    std::vector<uint32_t> _message_filter_inclusive;
+    std::vector<uint32_t> _message_filter_exclusive;
 };
 
 class UartEndpoint : public Endpoint {
