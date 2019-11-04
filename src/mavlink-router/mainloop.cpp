@@ -497,6 +497,21 @@ bool Mainloop::add_endpoints(Mainloop &mainloop, struct options *opt)
                     return false;
             }
 
+            if (conf->tx_filter_inc) {
+                char *token = strtok(conf->tx_filter_inc, ",");
+                while (token != NULL) {
+                    uart->add_message_to_inclusive_filter(atoi(token));
+                    token = strtok(NULL, ",");
+                } 
+            }
+            if (conf->tx_filter_exc) {
+                char *token = strtok(conf->tx_filter_exc, ",");
+                while (token != NULL) {
+                    uart->add_message_to_exclusive_filter(atoi(token));
+                    token = strtok(NULL, ",");
+                } 
+            }
+
             g_endpoints[i] = uart.release();
             mainloop.add_fd(g_endpoints[i]->fd, g_endpoints[i], EPOLLIN);
             i++;
@@ -509,15 +524,15 @@ bool Mainloop::add_endpoints(Mainloop &mainloop, struct options *opt)
                 return false;
             }
 
-            if (conf->filter_inc) {
-                char *token = strtok(conf->filter_inc, ",");
+            if (conf->tx_filter_inc) {
+                char *token = strtok(conf->tx_filter_inc, ",");
                 while (token != NULL) {
                     udp->add_message_to_inclusive_filter(atoi(token));
                     token = strtok(NULL, ",");
                 } 
             }
-            if (conf->filter_exc) {
-                char *token = strtok(conf->filter_exc, ",");
+            if (conf->tx_filter_exc) {
+                char *token = strtok(conf->tx_filter_exc, ",");
                 while (token != NULL) {
                     udp->add_message_to_exclusive_filter(atoi(token));
                     token = strtok(NULL, ",");
@@ -538,6 +553,21 @@ bool Mainloop::add_endpoints(Mainloop &mainloop, struct options *opt)
                     _add_tcp_retry(tcp.release());
                 }
                 continue;
+            }
+
+            if (conf->tx_filter_inc) {
+                char *token = strtok(conf->tx_filter_inc, ",");
+                while (token != NULL) {
+                    tcp->add_message_to_inclusive_filter(atoi(token));
+                    token = strtok(NULL, ",");
+                } 
+            }
+            if (conf->tx_filter_exc) {
+                char *token = strtok(conf->tx_filter_exc, ",");
+                while (token != NULL) {
+                    tcp->add_message_to_exclusive_filter(atoi(token));
+                    token = strtok(NULL, ",");
+                } 
             }
 
             if (_add_tcp_endpoint(tcp.get()) < 0) {
