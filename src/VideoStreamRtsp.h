@@ -68,6 +68,7 @@ private:
     CameraParameters::VIDEO_CODING_FORMAT mEncFormat;
     std::string mHost;
     uint32_t mPort;
+    uint32_t mIndex;
     std::string mPath;
     static GstRTSPServer *mServer;
     static bool isAttach;

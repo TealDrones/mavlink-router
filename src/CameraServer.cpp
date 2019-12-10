@@ -51,8 +51,14 @@ CameraServer::CameraServer(const ConfFile &conf)
     std::set<std::string> blackList = readBlacklistDevices(conf);
 
     std::vector<std::string> deviceList = mPluginManager.listCameraDevices();
+    int index = 0;
     for (auto deviceID : deviceList) {
-        log_debug("Camera Device : %s", deviceID.c_str());
+		
+		std::string gstpipe = "pipeline" + std::to_string(index);
+		index = index + 1;
+		
+		
+        log_info("========= Camera Device: %s    pipeline:%s", deviceID.c_str(), gstpipe.c_str());
 
         // TODO :: check if max camera count reached
 
@@ -86,8 +92,7 @@ CameraServer::CameraServer(const ConfFile &conf)
         device->setCameraDefinitionUri(readURI(conf, confDeviceId));
 
         // Set the GStreamer RTSP pipeline from conf file
-        device->setGstRTSPPipeline(readRTSPPipeline(conf, confDeviceId));
-
+        device->setGstRTSPPipeline(readRTSPPipeline(conf, confDeviceId, gstpipe));
         // create camera component with camera device
         CameraComponent *comp = new CameraComponent(device);
 
@@ -135,7 +140,8 @@ void CameraServer::start()
         if (camComp->start())
             log_error("Error in starting camera component");
 
-        camComp->startVideoStream(false);
+        camComp->startVideoStream(false); //false->RTSP
+        //~ camComp->startVideoStream(true); //true->UDP
     }
 
 #ifdef ENABLE_MAVLINK
@@ -218,12 +224,13 @@ std::string CameraServer::readURI(const ConfFile &conf, std::string deviceID)
         return {};
 }
 
-std::string CameraServer::readRTSPPipeline(const ConfFile &conf, std::string deviceID)
+std::string CameraServer::readRTSPPipeline(const ConfFile &conf, std::string deviceID, std::string pipelineID)
 {
     char *rtspPipeline = 0;
-    if (!conf.extract_options("rtsp", "pipeline", &rtspPipeline)) {
+    if (!conf.extract_options("rtsp", pipelineID.c_str(), &rtspPipeline)) {
         std::string rtspPipelineString(rtspPipeline);
         free(rtspPipeline);
+        log_info("+++++++++++++ pipeline read: %s", rtspPipelineString.c_str());
         return rtspPipelineString;
     } else
         return {};
