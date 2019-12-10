@@ -61,6 +61,7 @@ int VideoStreamUdp::uninit()
 int VideoStreamUdp::start()
 {
     log_info("%s::%s", typeid(this).name(), __func__);
+    gst_init(nullptr, nullptr);
     int ret = -1;
     ret = createAppsrcPipeline();
     setState(STATE_RUN);
@@ -229,6 +230,7 @@ int VideoStreamUdp::createAppsrcPipeline()
     GstElement *src, *conv, *enc, *parser, *payload, *sink;
     GstCaps *caps;
 
+    log_info("===== Before elements creation =====");
     mPipeline = gst_pipeline_new("UdpStream");
     src = gst_element_factory_make("appsrc", "VideoSrc");
     conv = gst_element_factory_make("videoconvert", "Conv");
