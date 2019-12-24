@@ -306,7 +306,7 @@ void MavlinkServer::_handle_image_start_capture(const struct sockaddr_in &addr,
         cb_data.comp_id = cmd.target_component;
         cb_data.addr = addr;
 
-/*        if (cmd.target_component == IMX412_COMP_ID) {
+        if (cmd.target_component == IMX412_COMP_ID) {
 			log_info("Selected snapshot from camera IMX412 \n");
 			struct msgbuffer buf = mq_server.get_buffer();
 			strcpy(buf.mtext, "s:1");
@@ -314,17 +314,13 @@ void MavlinkServer::_handle_image_start_capture(const struct sockaddr_in &addr,
 
 			if(!mq_server.write(msqid, buf)) {
 				log_error ("Message_queue failed, client did not read the message \n");
+				success = false;
 			}
 		}
-
-        else if... */
-
-
-
-        if (system ("/opt/teal/sbin/capture-still.sh")) 
-//        if (!tgtComp->startImageCapture(
-//               (uint32_t)cmd.param2 /*interval*/, (uint32_t)cmd.param3 /*count*/,
-//                std::bind(&MavlinkServer::_image_captured_cb, this, cb_data, _1, _2)))
+		//~ if (system ("/opt/teal/sbin/capture-still.sh")) //used on teal1
+        else if (!tgtComp->startImageCapture(
+               (uint32_t)cmd.param2 /*interval*/, (uint32_t)cmd.param3 /*count*/,
+                std::bind(&MavlinkServer::_image_captured_cb, this, cb_data, _1, _2)))
             success = true;
     }
 
@@ -380,7 +376,7 @@ void MavlinkServer::_handle_video_start_capture(const struct sockaddr_in &addr,
         cb_data.comp_id = cmd.target_component;
         memcpy(&cb_data.addr, &addr, sizeof(struct sockaddr_in));
 
-/*        if (cmd.target_component == IMX412_COMP_ID) {
+        if (cmd.target_component == IMX412_COMP_ID) {
 			log_info("Selected video start from camera IMX412 \n");
 			struct msgbuffer buf = mq_server.get_buffer();
 			strcpy(buf.mtext, "V:id=0,gsize=1280x720,gformat=yuv420,gnode=/dev/video3,vsize=1920x1080,ssize=1920x1080,sformat=jpeg,fpsrange=30-30,codectype=0,bitrate=16");
@@ -388,13 +384,11 @@ void MavlinkServer::_handle_video_start_capture(const struct sockaddr_in &addr,
 
 			if(!mq_server.write(msqid, buf)) {
 				log_error ("Message_queue failed, client did not read the message \n");
+				success = false;
 			}
 		}
-
-        else if.... */
-
-        if (system ("/opt/teal/sbin/video-start.sh")) {
-//        if (!tgtComp->startVideoCapture((uint32_t)cmd.param2 /*camera_Capture_status freq*/))
+		//if (system ("/opt/teal/sbin/video-start.sh")) {  //used on teal1
+        else if (!tgtComp->startVideoCapture((uint32_t)cmd.param2 /*camera_Capture_status freq*/)) {
             success = true;
             video_status = 1;
         }
@@ -413,7 +407,7 @@ void MavlinkServer::_handle_video_stop_capture(const struct sockaddr_in &addr,
     CameraComponent *tgtComp = getCameraComponent(cmd.target_component);
     if (tgtComp) {
 
-/*        if (cmd.target_component == IMX412_COMP_ID) {
+        if (cmd.target_component == IMX412_COMP_ID) {
 			log_info("Selected video stop from camera IMX412 \n");
 			struct msgbuffer buf = mq_server.get_buffer();
 			strcpy(buf.mtext, "G:id=0,gsize=1280x720,gformat=yuv420,gnode=/dev/video3");
@@ -421,13 +415,11 @@ void MavlinkServer::_handle_video_stop_capture(const struct sockaddr_in &addr,
 
 			if(!mq_server.write(msqid, buf)) {
 				log_error ("Message_queue failed, client did not read the message \n");
+				success = false;
 			}
 		}
-		
-        else if...*/
-
-        if (system ("/opt/teal/sbin/video-stop.sh")) {
-//        if (!tgtComp->stopVideoCapture())
+		// if (system ("/opt/teal/sbin/video-stop.sh")) { //used on teal1
+        else if (!tgtComp->stopVideoCapture()) {
             success = true;
             video_status = 0;
         }

@@ -35,3 +35,4 @@ tags
 /test/test-custom-stream
 /test/test-mavlink-protocol
 /test/test-rtsp-udp-stream-discovery
+/hal3_client

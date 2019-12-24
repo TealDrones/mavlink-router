@@ -10,9 +10,9 @@ int main(void)
 {
 	mqueue client;
 
+	printf("Client for message queue, use ctrl+c to exit.\n");
 	client.set_queue_name("gimbal.msg");
 	int msqid = client.start(false);
-	printf("Ready to receive messages\n");
 
 	for(;;) {
 
