@@ -212,6 +212,7 @@ void Drone::handleHeartbeatCB(mavlink_message_t &msg)
 
 void Drone::handleCameraInformationCB(mavlink_message_t &msg)
 {
+	log_info("Got MAVLINK_MSG_ID_CAMERA_INFORMATION");
     mavlink_camera_information_t info;
     mavlink_msg_camera_information_decode(&msg, &info);
     struct Stream s;
