@@ -173,9 +173,6 @@ VideoStreamRtsp::VideoStreamRtsp(std::shared_ptr<CameraDevice> camDev)
 
     /* Default: Set the RTSP video res same as camera res */
     mCamDev->getSize(mWidth, mHeight);
-
-    log_info("========== mWidth: %d      mHeight: %d ", mWidth, mHeight);
-
 }
 
 VideoStreamRtsp::~VideoStreamRtsp()
@@ -443,21 +440,12 @@ static GstElement *cb_create_element(GstRTSPMediaFactory *factory, const GstRTSP
 
     std::string launch = obj->getCameraDevice()->getGstRTSPPipeline();
 
-    log_info("======  Connection stablished  ======");
-    log_info("======  launch: %s  ======", launch.c_str());
-
     if (launch.empty()) {
         /* build pipeline description based on params received from URL */
         launch = obj->getGstPipeline(params);
     }
 
-    //===========================
-    
-    
-    //===========================
-
-
-    log_info("GST Pipeline: %s", launch.c_str());
+    log_debug("GST Pipeline: %s", launch.c_str());
 
     GError *error = NULL;
     GstElement *pipeline = NULL;

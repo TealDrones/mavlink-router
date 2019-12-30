@@ -54,11 +54,10 @@ CameraServer::CameraServer(const ConfFile &conf)
     int index = 0;
     for (auto deviceID : deviceList) {
 		
-		std::string gstpipe = "pipeline" + std::to_string(index);
-		index = index + 1;
+	std::string gstpipe = "pipeline" + std::to_string(index);
+	index = index + 1;
 		
-		
-        log_info("========= Camera Device: %s    pipeline:%s", deviceID.c_str(), gstpipe.c_str());
+        log_info(" Camera Device:%s    pipeline:%s", deviceID.c_str(), gstpipe.c_str());
 
         // TODO :: check if max camera count reached
 
@@ -93,6 +92,7 @@ CameraServer::CameraServer(const ConfFile &conf)
 
         // Set the GStreamer RTSP pipeline from conf file
         device->setGstRTSPPipeline(readRTSPPipeline(conf, confDeviceId, gstpipe));
+
         // create camera component with camera device
         CameraComponent *comp = new CameraComponent(device);
 
@@ -230,7 +230,7 @@ std::string CameraServer::readRTSPPipeline(const ConfFile &conf, std::string dev
     if (!conf.extract_options("rtsp", pipelineID.c_str(), &rtspPipeline)) {
         std::string rtspPipelineString(rtspPipeline);
         free(rtspPipeline);
-        log_info("+++++++++++++ pipeline read: %s", rtspPipelineString.c_str());
+        log_info("readRTSPPipeline - pipeline: %s", rtspPipelineString.c_str());
         return rtspPipelineString;
     } else
         return {};
@@ -259,7 +259,7 @@ bool CameraServer::readImgCapSettings(const ConfFile &conf, ImageSettings &imgSe
     imgSetting.width = opt.width;
     imgSetting.height = opt.height;
     imgSetting.fileFormat = static_cast<CameraParameters::IMAGE_FILE_FORMAT>(opt.format);
-    log_info("Image Capture Width=%d Height=%d format=%d", imgSetting.width, imgSetting.height,
+    log_debug("Image Capture Width=%d Height=%d format=%d", imgSetting.width, imgSetting.height,
              imgSetting.fileFormat);
 
     return true;
@@ -315,7 +315,7 @@ bool CameraServer::readVidCapSettings(const ConfFile &conf, VideoSettings &vidSe
     vidSetting.bitRate = opt.bitrate;
     vidSetting.encoder = static_cast<CameraParameters::VIDEO_CODING_FORMAT>(opt.encoder);
     vidSetting.fileFormat = static_cast<CameraParameters::VIDEO_FILE_FORMAT>(opt.format);
-    log_info("Video Capture Width=%d Height=%d framerate=%d, bitrate=%dkbps, encoder=%d, format=%d",
+    log_debug("Video Capture Width=%d Height=%d framerate=%d, bitrate=%dkbps, encoder=%d, format=%d",
              vidSetting.width, vidSetting.height, vidSetting.frameRate, vidSetting.bitRate,
              vidSetting.encoder, vidSetting.fileFormat);
 

@@ -25,6 +25,7 @@
 #include "CameraComponent.h"
 #include "conf_file.h"
 #include "socket.h"
+#include "mqueue.h"
 
 typedef struct image_callback {
     int comp_id;             /* Component ID */
@@ -49,7 +50,9 @@ private:
     bool _is_sys_id_found;
     int _system_id;
     int _comp_id;
+    int msqid;
     std::map<int, CameraComponent *> compIdToObj;
+    mqueue mq_server;
     uint8_t video_status;
     int _tilt;
 
