@@ -70,10 +70,11 @@ public:
     virtual int startVideoCapture(int status_freq);
     virtual int stopVideoCapture();
     virtual uint8_t getVideoCaptureStatus();
-    int startVideoStream(const bool isUdp);
+    int startVideoStream(const bool isUdp, std::string ipAddr);
     int stopVideoStream();
     uint8_t getVideoStreamStatus() const;
     int resetCameraSettings(void);
+    std::shared_ptr<VideoStream> getVideoStream();
 
 private:
     std::string mCamDevName;               /* Camera device name */

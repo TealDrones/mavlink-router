@@ -131,6 +131,11 @@ const std::map<std::string, std::string> &CameraComponent::getParamList() const
     return mCamParam.getParameterList();
 }
 
+std::shared_ptr<VideoStream> CameraComponent::getVideoStream()
+{
+	return mVidStream;
+}
+
 void CameraComponent::initStorageInfo(struct StorageInfo &storeInfo)
 {
     // TODO:: Fill storage details with real values
@@ -399,7 +404,7 @@ int CameraComponent::setVideoFrameFormat(uint32_t param_value)
     return 0;
 }
 
-int CameraComponent::startVideoStream(const bool isUdp)
+int CameraComponent::startVideoStream(const bool isUdp, std::string ipAddr)
 {
     int ret = 0;
 
@@ -415,7 +420,7 @@ int CameraComponent::startVideoStream(const bool isUdp)
     if (isUdp)
         mVidStream = std::make_shared<VideoStreamUdp>(mCamDev);
     else {
-        mVidStream = std::make_shared<VideoStreamRtsp>(mCamDev);
+        mVidStream = std::make_shared<VideoStreamRtsp>(mCamDev, ipAddr);
     }
 
     ret = mVidStream->init();

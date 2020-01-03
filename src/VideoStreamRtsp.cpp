@@ -157,7 +157,7 @@ static std::map<std::string, std::string> parseUrlQuery(const char *query)
     return map;
 }
 
-VideoStreamRtsp::VideoStreamRtsp(std::shared_ptr<CameraDevice> camDev)
+VideoStreamRtsp::VideoStreamRtsp(std::shared_ptr<CameraDevice> camDev, std::string ipAddr)
     : mCamDev(camDev)
     , mState(STATE_IDLE)
     , mWidth(0)
@@ -165,6 +165,7 @@ VideoStreamRtsp::VideoStreamRtsp(std::shared_ptr<CameraDevice> camDev)
     , mEncFormat(CameraParameters::VIDEO_CODING_AVC)
     , mHost(DEFAULT_HOST)
     , mPort(DEFAULT_SERVICE_PORT)
+    , mIPaddress(ipAddr)
 {
     log_info("%s Device:%s", __func__, mCamDev->getDeviceId().c_str());
     mPath = "/" + mCamDev->getDeviceId();
@@ -173,9 +174,6 @@ VideoStreamRtsp::VideoStreamRtsp(std::shared_ptr<CameraDevice> camDev)
 
     /* Default: Set the RTSP video res same as camera res */
     mCamDev->getSize(mWidth, mHeight);
-
-    log_info("========== mWidth: %d      mHeight: %d ", mWidth, mHeight);
-
 }
 
 VideoStreamRtsp::~VideoStreamRtsp()
@@ -324,12 +322,18 @@ int VideoStreamRtsp::getFormat()
 /* The host/IP/Multicast group to send the packets to */
 int VideoStreamRtsp::setAddress(std::string ipAddr)
 {
+    mIPaddress = ipAddr;
     return 0;
 }
 
 std::string VideoStreamRtsp::getAddress()
 {
-    return 0;
+    return mIPaddress;
+}
+
+std::string VideoStreamRtsp::getPath()
+{
+    return mPath;
 }
 
 int VideoStreamRtsp::setPort(uint32_t port)
@@ -443,21 +447,12 @@ static GstElement *cb_create_element(GstRTSPMediaFactory *factory, const GstRTSP
 
     std::string launch = obj->getCameraDevice()->getGstRTSPPipeline();
 
-    log_info("======  Connection stablished  ======");
-    log_info("======  launch: %s  ======", launch.c_str());
-
     if (launch.empty()) {
         /* build pipeline description based on params received from URL */
         launch = obj->getGstPipeline(params);
     }
 
-    //===========================
-    
-    
-    //===========================
-
-
-    log_info("GST Pipeline: %s", launch.c_str());
+    log_debug("GST Pipeline: %s", launch.c_str());
 
     GError *error = NULL;
     GstElement *pipeline = NULL;

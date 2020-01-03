@@ -115,6 +115,11 @@ int VideoStreamUdp::getFormat()
     return 0;
 }
 
+std::string VideoStreamUdp::getPath()
+{
+    return 0;
+}
+
 int VideoStreamUdp::setAddress(std::string ipAddr)
 {
     // TODO::Check if the argument is valid
@@ -230,7 +235,6 @@ int VideoStreamUdp::createAppsrcPipeline()
     GstElement *src, *conv, *enc, *parser, *payload, *sink;
     GstCaps *caps;
 
-    log_info("===== Before elements creation =====");
     mPipeline = gst_pipeline_new("UdpStream");
     src = gst_element_factory_make("appsrc", "VideoSrc");
     conv = gst_element_factory_make("videoconvert", "Conv");

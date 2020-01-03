@@ -30,7 +30,7 @@
 
 class VideoStreamRtsp final : public VideoStream {
 public:
-    VideoStreamRtsp(std::shared_ptr<CameraDevice> camDev);
+    VideoStreamRtsp(std::shared_ptr<CameraDevice> camDev, std::string ipAddr);
     ~VideoStreamRtsp();
 
     int init();
@@ -45,6 +45,7 @@ public:
     // The host/IP/Multicast group to send the packets to
     int setAddress(std::string ipAddr);
     std::string getAddress();
+    std::string getPath();
     // The port to send the packets to
     int setPort(uint32_t port);
     int getPort();
@@ -69,6 +70,7 @@ private:
     std::string mHost;
     uint32_t mPort;
     uint32_t mIndex;
+    std::string mIPaddress;
     std::string mPath;
     static GstRTSPServer *mServer;
     static bool isAttach;

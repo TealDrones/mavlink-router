@@ -41,6 +41,7 @@ public:
     // The host/IP/Multicast group to send the packets to
     int setAddress(std::string ipAddr);
     std::string getAddress();
+    std::string getPath();
     // The port to send the packets to
     int setPort(uint32_t port);
     int getPort();

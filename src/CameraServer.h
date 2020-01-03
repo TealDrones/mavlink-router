@@ -33,7 +33,7 @@
 
 class CameraServer {
 public:
-    CameraServer(const ConfFile &conf);
+    CameraServer(const ConfFile &conf, std::string ipAddr);
     ~CameraServer();
     void start();
     void stop();
@@ -59,4 +59,5 @@ private:
 
     std::map<std::string, std::vector<std::string>> mCamInfoMap;
     std::vector<CameraComponent *> compList;
+    std::string mIPaddress;
 };

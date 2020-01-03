@@ -156,6 +156,8 @@ BASE_FILES = \
 	src/PluginBase.h \
 	src/v4l2_interface.cpp \
 	src/v4l2_interface.h \
+	src/mqueue.h \
+	src/mqueue.cpp \
 	plugins/V4l2Camera/PluginV4l2.h\
 	plugins/V4l2Camera/PluginV4l2.cpp \
 	plugins/V4l2Camera/CameraDeviceV4l2.cpp \
@@ -200,12 +202,19 @@ dcm_SOURCES = \
 	${BASE_FILES} \
 	src/main.cpp
 
+hal3_client_SOURCES = \
+	src/client.cpp   \
+	src/mqueue.h   \
+	src/mqueue.cpp
+
 dcm_LDADD = $(GLIB_LIBS) $(GST_LIBS) $(GZB_LIBS)
+
+hal3_client_LDADD = $(GLIB_LIBS) $(GST_LIBS) $(GZB_LIBS)
 
 CLEANFILES += dronecode-camera-manager.service
 
 #Samples
-EXTRA_PROGRAMS = test/test-custom-stream
+EXTRA_PROGRAMS = test/test-custom-stream hal3_client
 
 test_test_custom_stream_LDADD = ${dcm_LDADD}
 
