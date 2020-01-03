@@ -115,6 +115,11 @@ int VideoStreamUdp::getFormat()
     return 0;
 }
 
+std::string VideoStreamUdp::getPath()
+{
+    return 0;
+}
+
 int VideoStreamUdp::setAddress(std::string ipAddr)
 {
     // TODO::Check if the argument is valid

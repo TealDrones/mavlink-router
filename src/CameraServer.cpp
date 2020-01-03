@@ -30,11 +30,12 @@
 #define GAZEBO_STRING "gazebo"
 #endif
 
-CameraServer::CameraServer(const ConfFile &conf)
+CameraServer::CameraServer(const ConfFile &conf, std::string ipAddr)
     : mPluginManager()
 #ifdef ENABLE_MAVLINK
     , mMavlinkServer(conf)
 #endif
+    , mIPaddress(ipAddr)
 {
     std::string confDeviceId;
     // Read image capture settings/destination
@@ -140,7 +141,7 @@ void CameraServer::start()
         if (camComp->start())
             log_error("Error in starting camera component");
 
-        camComp->startVideoStream(false); //false->RTSP
+        camComp->startVideoStream(false, mIPaddress); //false->RTSP
         //~ camComp->startVideoStream(true); //true->UDP
     }
 

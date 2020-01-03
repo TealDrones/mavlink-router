@@ -36,6 +36,7 @@ using namespace std::placeholders;
 #define MAX_MAVLINK_MESSAGE_SIZE 1024
 #define DEFAULT_SYSTEM_ID 1
 #define IMX412_COMP_ID 101
+#define IP_ADDRESS "127.0.0.1"
 
 static const float epsilon = std::numeric_limits<float>::epsilon();
 
@@ -162,42 +163,42 @@ void MavlinkServer::_handle_request_camera_information(const struct sockaddr_in 
 
 void MavlinkServer::_handle_request_video_stream_information(const struct sockaddr_in &addr, mavlink_command_long_t &cmd)
 {
-    log_debug("VIDEO STREAM INFO REQ ____________________________%s", __func__);
+    log_info("%s : VIDEO STREAM INFO REQ", __func__);
 
     mavlink_message_t msg;
     bool success = false;
 
-    // Take no action if flag not set
-    if (std::abs(cmd.param1) <= epsilon) {
-        log_warning("No Action");
-        _send_ack(addr, cmd.command, cmd.target_component, true);
-        return;
-    }
-
     CameraComponent *tgtComp = getCameraComponent(cmd.target_component);
     if (tgtComp) {
-        const CameraInfo &camInfo = tgtComp->getCameraInfo();
+        int stream_w = 0;
+        int stream_h = 0;
+        std::string stream_name;
+        std::string rtsp_path;
+
         log_info("STREAM INFORMATION FOR: %d", cmd.target_component);
-        // mavlink_msg_video_stream_information_pack(
-        // _system_id, // uint8_t system_id, 
-        // cmd.target_component, // uint8_t component_id, 
-        // &msg, // mavlink_message_t* msg, 
-        // 0, // uint8_t stream_id, 
-        // 1,    // uint8_t count, 
-        // VIDEO_STREAM_TYPE_RTPUDP, // uint8_t type, 
-        // VIDEO_STREAM_STATUS_FLAGS_RUNNING, // uint16_t flags, VIDEO_STREAM_STATUS_FLAGS_THERMAL
-        // 30,// float framerate, 
-        // 1280, // uint16_t resolution_h, 
-        // 720, // uint16_t resolution_v, 
-        // 4000, // uint32_t bitrate, 
-        // 0, // uint16_t rotation, 
-        // 120, // uint16_t hfov,
-        // "Visable",// const char *name, 
-        // "udp://10.73.41.83:5600/"// const char *uri
-        // );
+
+        if (cmd.target_component == IMX412_COMP_ID) {
+			stream_w = 1280;
+			stream_h = 720;
+		} else {
+			stream_w = 640;
+			stream_h = 512;
+		}
+
+        stream_name = tgtComp->getVideoStream()->getPath();
+        stream_name.erase(0, 1);  //removing letter '/'
+
+        rtsp_path = "rtsp://" + tgtComp->getVideoStream()->getAddress() + ":"
+		            + std::to_string (tgtComp->getVideoStream()->getPort())
+		            + tgtComp->getVideoStream()->getPath();
+
+        mavlink_msg_video_stream_information_pack(
+        _system_id, cmd.target_component, &msg, cmd.target_component - 100, 2, 
+        VIDEO_STREAM_TYPE_RTSP, VIDEO_STREAM_STATUS_FLAGS_RUNNING, 30,
+        stream_w, stream_h, 4000, 0, 120, stream_name.c_str(), rtsp_path.c_str());
 
         if (!_send_mavlink_message(&addr, msg)) {
-            log_error("Sending ideo_stream information failed for camera %d.", cmd.target_component);
+            log_error("Sending video_stream information failed for camera %d.", cmd.target_component);
             return;
         }
 
@@ -206,8 +207,6 @@ void MavlinkServer::_handle_request_video_stream_information(const struct sockad
 
     _send_ack(addr, cmd.command, cmd.target_component, success);
 }
-
-
 
 void MavlinkServer::_handle_request_camera_settings(const struct sockaddr_in &addr,
                                                     mavlink_command_long_t &cmd)
@@ -648,8 +647,8 @@ void MavlinkServer::_handle_mavlink_message(const struct sockaddr_in &addr, mavl
             this->_handle_request_camera_information(addr, cmd);
             break;
         case MAV_CMD_REQUEST_VIDEO_STREAM_INFORMATION:
-             log_info("Requesting Stream INFO %d unhandled. Discarding.", cmd.command);
-        //     this->_handle_request_video_stream_information(addr, cmd);
+             log_info("Requesting Stream INFO %d", cmd.command);
+             this->_handle_request_video_stream_information(addr, cmd);
              break;
         case MAV_CMD_REQUEST_CAMERA_SETTINGS:
             this->_handle_request_camera_settings(addr, cmd);
