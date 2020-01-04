@@ -121,6 +121,12 @@ in seperate terminal setup for gstream
 gst-launch-1.0 v4l2src device=/dev/video4 ! videoparse width=1280 height=768 format=nv12 framerate=30 ! queue ! videoflip video-direction=180 ! omxh264enc control-rate=constant target-bitrate=2000000 ! video/x-h264,profile=main ! rtph264pay pt=96 ! udpsink host=192.168.168.209 port=5601
 ```
 
+### UDP Stream playback on destination without ground control
+```bash
+gst-launch-1.0 -vc udpsrc port=5600 ! application/x-rtp, payload=96 ! rtph264depay ! omxh264dec ! videoscale ! videorate ! videoconvert ! autovideosink
+```
+
+### 
 dronecode camera service
 ```bash
 systemctl stop dronecode-camera-manager.service
