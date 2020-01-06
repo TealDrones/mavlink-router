@@ -135,5 +135,15 @@ systemctl reset dronecode-camera-manager.service
 systemctl disable dronecode-camera-manager.service
 systemctl enable dronecode-camera-manager.service
 ```
+### Bring Up Gimbal
+
+```bash
+cd /home/root/tealflasher/
+echo 1 > /sys/kernel/debug/regulator/hadron_pwr_5p0/enable 
+./set-gpio.sh 32 1
+./set-gpio.sh 32 0
+```
+
+
 
 configuration is at:
