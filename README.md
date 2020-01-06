@@ -70,19 +70,19 @@ from the 845
 ## visible
 ```bash
 # hal3_test
-CAM0>> A:id=0,gsize=1280x720,gformat=yuv420,gnode=/dev/video3
+CAM0>> A:id=0,gsize=1280x720,gformat=yuv420,gnode=/dev/video4
 # hal3 snapshot still
 CAM0>> s:1
 # hal3 video record
-CAM0>> V:id=0,gsize=1280x720,gformat=yuv420,gnode=/dev/video3,vsize=1920x1080,ssize=1920x1080,sformat=jpeg,fpsrange=30-30,codectype=0,bitrate=16
+CAM0>> V:id=0,gsize=1280x720,gformat=yuv420,gnode=/dev/video4,vsize=1920x1080,ssize=1920x1080,sformat=jpeg,fpsrange=30-30,codectype=0,bitrate=16
 # stop record
-CAM0>> G:id=0,gsize=1280x720,gformat=yuv420,gnode=/dev/video3
+CAM0>> G:id=0,gsize=1280x720,gformat=yuv420,gnode=/dev/video4
 ```
 
 ### visible gst still
 from the 845
 ```bash
-gst-launch-1.0 v4l2src device=/dev/video3 num-buffers=1 ! 'video/x-raw,width=1920,height=1088' ! jpegenc ! filesink location=test.jpg
+gst-launch-1.0 v4l2src device=/dev/video4 num-buffers=1 ! 'video/x-raw,width=1920,height=1088' ! jpegenc ! filesink location=test.jpg
 ```
 
 ### visible gst video
