@@ -103,6 +103,21 @@ this has been fixed in the MK1, and will be in the next release
 see ticket https://tech.intrinsyc.com/issues/2116
 
 
+### IR Test Still
+```bash
+gst-launch-1.0 v4l2src device=/dev/video2 num-buffers=1 ! 'video/x-raw,width=640,height=512' ! jpegenc ! filesink location=/data/misc/camera/IRStill.jpg
+```
+
+### IR Test Video
+```bash
+gst-launch-1.0 v4l2src device=/dev/video2 num-buffers=300 ! 'video/x-raw,width=640,height=512' ! \
+omxh264enc control-rate=constant target-bitrate=2000000 ! \
+'video/x-h264,streamformat=(string)byte-stream,profile=main' ! \
+h264parse ! filesink location=P1.h264
+```
+
+
+
 ### IR Stream
 ```bash
 gst-launch-1.0 v4l2src device=/dev/video2 ! 'video/x-raw,width=640,height=512' ! queue ! videoflip video-direction=180 ! omxh264enc control-rate=constant target-bitrate=1000000 ! video/x-h264,profile=main ! rtph264pay pt=96 ! udpsink host=192.168.168.209 port=5600
@@ -135,15 +150,13 @@ systemctl reset dronecode-camera-manager.service
 systemctl disable dronecode-camera-manager.service
 systemctl enable dronecode-camera-manager.service
 ```
-### Bring Up Gimbal
 
+### Bring Up Gimbal
 ```bash
 cd /home/root/tealflasher/
 echo 1 > /sys/kernel/debug/regulator/hadron_pwr_5p0/enable 
 ./set-gpio.sh 32 1
 ./set-gpio.sh 32 0
 ```
-
-
 
 configuration is at:
