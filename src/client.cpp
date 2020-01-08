@@ -12,15 +12,15 @@ int main(void)
 
 	printf("Client for message queue, use ctrl+c to exit.\n");
 	client.set_queue_name("gimbal.msg");
-	int msqid = client.start(false);
+	client.start(false);
 
 	for(;;) {
 
 		struct msgbuffer buf = client.get_buffer();
-		if (!client.read(msqid, &buf, sizeof buf.mtext)) {
+		if (!client.read(&buf)) {
 			printf("Unable to read from mqueue server, trying in 5 seconds.\n");
 			sleep(5);
-			msqid = client.start(false);
+			client.start(false);
 		}
 		else if (buf.mtext[0] != 0) {
 			/* Print message */

@@ -28,7 +28,6 @@ void mqueue::set_single_message_mode (bool mode)
 int mqueue::start (bool server_mode)
 {
 	key_t key;
-	int msqid;
 
 	/* Message queue's key */
 	if ((key = ftok(queue_file.c_str(), 'B')) == -1) {
@@ -50,11 +49,11 @@ int mqueue::start (bool server_mode)
 			return -1;
 		}
 	}
-	return msqid;
+	return 0;
 }
 
 /* Write message to message queue */
-bool mqueue::write (int msqid, msgbuffer buf)
+bool mqueue::write (msgbuffer buf)
 {
 	bool retval = true;
 
@@ -66,9 +65,9 @@ bool mqueue::write (int msqid, msgbuffer buf)
 		}
 	} else {
 		/* Single message mode writes one message and waits for client to extract the data */
-		if (get_num_messages (msqid) > 0) {
+		if (get_num_messages () > 0) {
 			printf("Flushing mqueue \n");
-			flush_queue(msqid);
+			flush_queue();
 		}
 
 		/* Using IPC_NOWAIT flag, msgsnd/msgrcv always return -1 with error code ENOMSG*/
@@ -76,11 +75,11 @@ bool mqueue::write (int msqid, msgbuffer buf)
 
 			int counter = 0;
 			retval = true;
-			while (get_num_messages(msqid) == 1) {
+			while (get_num_messages() == 1) {
 
 				if (counter == WAIT_MSECONDS) {
 					/* Client dit not read the message, cleaning mqueue */
-					flush_queue (msqid);
+					flush_queue ();
 					retval = false;
 					break;
 				}
@@ -97,10 +96,10 @@ bool mqueue::write (int msqid, msgbuffer buf)
 }
 
 /* Read message from queue */
-bool mqueue::read (int msqid, msgbuffer *buf, int len)
+bool mqueue::read (msgbuffer *buf)
 {
 	/* Using IPC_NOWAIT flag, msgsnd/msgrcv always return -1 with error code ENOMSG */
-	if (msgrcv(msqid, buf, len, 0, MSG_NOERROR|IPC_NOWAIT) == -1) {
+	if (msgrcv(msqid, buf, sizeof buf->mtext, 0, MSG_NOERROR|IPC_NOWAIT) == -1) {
 		if (errno != ENOMSG) {
 			perror("msgrcv");
 			return false;
@@ -111,17 +110,17 @@ bool mqueue::read (int msqid, msgbuffer *buf, int len)
 }
 
 /* Removes messages from queue */
-void mqueue::flush_queue (int msqid)
+void mqueue::flush_queue ()
 {
 	struct msgbuffer dummy_buf = get_buffer();
 
-	while (get_num_messages(msqid) > 0) {
+	while (get_num_messages() > 0) {
 		msgrcv(msqid, &dummy_buf, sizeof dummy_buf.mtext, 0, MSG_NOERROR|IPC_NOWAIT);
 	}
 }
 
 /* Get current number of messages stored in the queue */
-int mqueue::get_num_messages (int msqid)
+int mqueue::get_num_messages ()
 {
 	struct msqid_ds ds;
 
@@ -134,7 +133,7 @@ int mqueue::get_num_messages (int msqid)
 }
 
 /* Get amount of bytes stored in queue */
-int mqueue::get_num_bytes (int msqid)
+int mqueue::get_num_bytes ()
 {
 	struct msqid_ds ds;
 
@@ -158,4 +157,14 @@ msgbuffer mqueue::get_buffer ()
 	}
 
 	return buf;
+}
+
+/* Remove message queue */
+int mqueue::remove ()
+{
+	if (msgctl(msqid, IPC_RMID, NULL) == -1) {
+		return -1;
+	}
+
+	return 0;
 }
