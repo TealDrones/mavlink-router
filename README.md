@@ -120,7 +120,7 @@ h264parse ! filesink location=P1.h264
 
 ### IR Stream
 ```bash
-gst-launch-1.0 v4l2src device=/dev/video2 ! 'video/x-raw,width=640,height=512' ! queue ! videoflip video-direction=180 ! omxh264enc control-rate=constant target-bitrate=1000000 ! video/x-h264,profile=main ! rtph264pay pt=96 ! udpsink host=192.168.168.209 port=5600
+gst-launch-1.0 v4l2src device=/dev/video2 ! 'video/x-raw,width=640,height=512' ! queue ! videoflip video-direction=180 ! omxh264enc control-rate=constant target-bitrate=1000000 ! video/x-h264,profile=main ! rtph264pay pt=96 ! udpsink host=192.168.168.200 port=5600
 
 ```
 
@@ -133,7 +133,7 @@ A:id=0,gsize=1280x720,gformat=yuv420,gnode=/dev/video4
 
 in seperate terminal setup for gstream
 ```bash
-gst-launch-1.0 v4l2src device=/dev/video4 ! videoparse width=1280 height=768 format=nv12 framerate=30 ! queue ! videoflip video-direction=180 ! omxh264enc control-rate=constant target-bitrate=2000000 ! video/x-h264,profile=main ! rtph264pay pt=96 ! udpsink host=192.168.168.209 port=5601
+gst-launch-1.0 v4l2src device=/dev/video4 ! videoparse width=1280 height=768 format=nv12 framerate=30 ! queue ! videoflip video-direction=180 ! omxh264enc control-rate=constant target-bitrate=2000000 ! video/x-h264,profile=main ! rtph264pay pt=96 ! udpsink host=192.168.168.200 port=5601
 ```
 
 ### UDP Stream playback on destination without ground control
