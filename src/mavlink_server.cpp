@@ -396,6 +396,51 @@ void MavlinkServer::_handle_video_start_capture(const struct sockaddr_in &addr,
     _send_ack(addr, cmd.command, cmd.target_component, success);
 }
 
+void MavlinkServer::_handle_request_video_stream_status(const struct sockaddr_in &addr,
+                                                mavlink_command_long_t &cmd)
+{
+    log_debug("%s", __func__);
+    bool success = false;
+    mavlink_message_t msg;
+    image_callback_t cb_data;
+
+    CameraComponent *tgtComp = getCameraComponent(cmd.target_component);
+
+    log_info("Requesting video stream status on camera component: %d \n", cmd.target_component);
+
+    if (tgtComp) {
+        cb_data.comp_id = cmd.target_component;
+        cb_data.addr = addr;
+
+        int stream_w;
+        int stream_h;
+        int bitrate = 4000;
+        int rotation = 0;
+        int fov = 0;
+
+        if (cmd.target_component == IMX412_COMP_ID) {
+            stream_w = 1280;
+            stream_h = 720;
+        } else {
+            stream_w = 640;
+            stream_h = 512;
+        }
+
+        mavlink_msg_video_stream_status_pack(_system_id, cmd.target_component, &msg,
+                                             cmd.param1, VIDEO_STREAM_STATUS_FLAGS_RUNNING,
+                                             30, stream_w, stream_h, bitrate, rotation, fov);
+
+        if (!_send_mavlink_message(&addr, msg)) {
+            log_error("Sending video stream status failed for camera %d.", cmd.target_component);
+            return;
+        }
+
+        success = true;
+    }
+
+    _send_ack(addr, cmd.command, cmd.target_component, success);
+}
+
 void MavlinkServer::_handle_video_stop_capture(const struct sockaddr_in &addr,
                                                mavlink_command_long_t &cmd)
 {
@@ -695,6 +740,10 @@ void MavlinkServer::_handle_mavlink_message(const struct sockaddr_in &addr, mavl
         case MAV_CMD_SET_CAMERA_ZOOM:
             log_info("Handle Zoom: %d .", cmd.command);
             this->_handle_camera_zoom(addr, cmd);
+            break;
+        case MAV_CMD_REQUEST_VIDEO_STREAM_STATUS:
+            log_info("----------MAV_CMD_REQUEST_VIDEO_STREAM_STATUS");
+            this->_handle_request_video_stream_status(addr, cmd);
             break;
         case MAV_CMD_SET_CAMERA_FOCUS:
             log_info("TODO SETUP %d unhandled. Discarding.", cmd.command);

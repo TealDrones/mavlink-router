@@ -66,6 +66,7 @@ private:
                                              mavlink_command_long_t &cmd);
     void _handle_set_camera_mode(const struct sockaddr_in &addr,
                                                         mavlink_command_long_t &cmd);
+    void _handle_request_video_stream_status(const struct sockaddr_in &addr, mavlink_command_long_t &cmd);
     void _handle_image_start_capture(const struct sockaddr_in &addr, mavlink_command_long_t &cmd);
     void _handle_image_stop_capture(const struct sockaddr_in &addr, mavlink_command_long_t &cmd);
     void _handle_request_video_stream_information(const sockaddr_in&, mavlink_command_long_t&);
