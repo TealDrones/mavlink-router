@@ -84,8 +84,8 @@ MavlinkServer::MavlinkServer(const ConfFile &conf)
     }
 
     log_debug("Creating message queue structure");
-    mq_server.set_queue_name("gimbal.msg");
-    msqid = mq_server.start(true);
+    mq_server.set_queue_name("hal3.msg");
+    mq_server.start(true);
     mq_server.set_single_message_mode(true);
 
     if (opt.broadcast[0])
@@ -311,7 +311,7 @@ void MavlinkServer::_handle_image_start_capture(const struct sockaddr_in &addr,
 			strcpy(buf.mtext, "s:1");
 			success = true;
 
-			if(!mq_server.write(msqid, buf)) {
+			if(!mq_server.write(buf)) {
 				log_error ("Message_queue failed, client did not read the message \n");
 				success = false;
 			}
@@ -381,7 +381,7 @@ void MavlinkServer::_handle_video_start_capture(const struct sockaddr_in &addr,
 			strcpy(buf.mtext, "V:id=0,gsize=1280x720,gformat=yuv420,gnode=/dev/video3,vsize=1920x1080,ssize=1920x1080,sformat=jpeg,fpsrange=30-30,codectype=0,bitrate=16");
 			success = true;
 
-			if(!mq_server.write(msqid, buf)) {
+			if(!mq_server.write(buf)) {
 				log_error ("Message_queue failed, client did not read the message \n");
 				success = false;
 			}
@@ -412,7 +412,7 @@ void MavlinkServer::_handle_video_stop_capture(const struct sockaddr_in &addr,
 			strcpy(buf.mtext, "G:id=0,gsize=1280x720,gformat=yuv420,gnode=/dev/video3");
 			success = true;
 
-			if(!mq_server.write(msqid, buf)) {
+			if(!mq_server.write(buf)) {
 				log_error ("Message_queue failed, client did not read the message \n");
 				success = false;
 			}
@@ -830,7 +830,7 @@ void MavlinkServer::stop()
         Mainloop::get_mainloop()->del_timeout(_timeout_handler);
 
     /* Removing message queue */
-	if (msgctl(msqid, IPC_RMID, NULL) == -1) {
+	if (mq_server.remove() == -1) {
 		log_error("Failed to remove message queue!");
 		exit(1);
 	}

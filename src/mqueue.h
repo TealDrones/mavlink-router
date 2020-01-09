@@ -24,10 +24,13 @@ class mqueue {
     int start (bool);
     void set_queue_name (std::string);
     void set_single_message_mode (bool mode);
-	bool write (int, msgbuffer);
-	bool read (int, msgbuffer*, int);
-	int get_num_messages (int);
-	int get_num_bytes (int);
-	void flush_queue (int);
+	bool write (msgbuffer);
+	bool read (msgbuffer*);
+	int get_num_messages ();
+	int get_num_bytes ();
+	void flush_queue ();
 	msgbuffer get_buffer ();
+	int remove ();
+  private:
+    int msqid;
 };

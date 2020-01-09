@@ -203,7 +203,7 @@ dcm_SOURCES = \
 	src/main.cpp
 
 hal3_client_SOURCES = \
-	src/client.cpp   \
+	src/hal3_client.cpp   \
 	src/mqueue.h   \
 	src/mqueue.cpp
 
