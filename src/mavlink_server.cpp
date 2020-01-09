@@ -84,7 +84,7 @@ MavlinkServer::MavlinkServer(const ConfFile &conf)
     }
 
     log_debug("Creating message queue structure");
-    mq_server.set_queue_name("gimbal.msg");
+    mq_server.set_queue_name("hal3.msg");
     mq_server.start(true);
     mq_server.set_single_message_mode(true);
 

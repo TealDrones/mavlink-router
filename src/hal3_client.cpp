@@ -11,7 +11,7 @@ int main(void)
 	mqueue client;
 
 	printf("Client for message queue, use ctrl+c to exit.\n");
-	client.set_queue_name("gimbal.msg");
+	client.set_queue_name("hal3.msg");
 	client.start(false);
 
 	for(;;) {
