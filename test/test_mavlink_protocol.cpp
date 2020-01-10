@@ -52,6 +52,7 @@ public:
     bool setMode(int camera_id, int mode);
     int getMode(int camera_id);
     void getStream(int camera_id);
+    void getStreamStatus(int camera_id);
     void imageCapture(int camera_id, int count, int interval);
     std::vector<int> getCameraIdList() const;
     std::string getCameraName(int camera_id) const;
@@ -73,6 +74,7 @@ private:
     bool sendCameraMsg(mavlink_message_t &msg);
     void handleCameraInformationCB(mavlink_message_t &msg);
     void handleVideoStreamInformationCB(mavlink_message_t &msg);
+    void handleVideoStreamStatusCB(mavlink_message_t &msg);
     void handleCameraSettingsCB(mavlink_message_t &msg);
     void handleHeartbeatCB(mavlink_message_t &msg);
     void handleAckCB(mavlink_message_t &msg);
@@ -193,6 +195,15 @@ void Drone::getStream(int camera_id)
     sendCameraMsg(out_msg);
 }
 
+void Drone::getStreamStatus(int camera_id)
+{
+    mavlink_message_t out_msg;
+    mavlink_msg_command_long_pack(GCS_SYSID, MAV_COMP_ID_ALL, &out_msg, sysid, camera_id,
+                                  MAV_CMD_REQUEST_VIDEO_STREAM_STATUS, 0, 1, 0, 0, 0, 0, 0, 0);
+    log_info("MAV_CMD_REQUEST_VIDEO_STREAM_STATUS sent");
+    sendCameraMsg(out_msg);
+}
+
 void Drone::imageCapture(int camera_id, int count, int interval)
 {
     mavlink_message_t out_msg;
@@ -236,10 +247,18 @@ void Drone::handleCameraInformationCB(mavlink_message_t &msg)
 
 void Drone::handleVideoStreamInformationCB(mavlink_message_t &msg)
 {
-	log_info("Got MAVLINK_MSG_ID_VIDEO_STREAM_INFORMATION");
+    log_info("Got MAVLINK_MSG_ID_VIDEO_STREAM_INFORMATION");
     mavlink_video_stream_information_t info;
     mavlink_msg_video_stream_information_decode(&msg, &info);
     log_info("Video Stream Information >> Stream_ID:%d  name:%s  uri:%s ",info.stream_id, info.name, info.uri);
+}
+
+void Drone::handleVideoStreamStatusCB(mavlink_message_t &msg)
+{
+    log_info("Got MAVLINK_MSG_ID_VIDEO_STREAM_STATUS");
+    mavlink_video_stream_status_t status;
+    mavlink_msg_video_stream_status_decode(&msg, &status);
+    log_info("Video Stream Status >> Stream_ID:%d  resolution:%d x %d  hfov:%d ",status.stream_id, status.resolution_h, status.resolution_v, status.hfov);
 }
 
 void Drone::handleCameraSettingsCB(mavlink_message_t &msg)
@@ -259,9 +278,20 @@ void Drone::handleAckCB(mavlink_message_t &msg)
 {
     mavlink_command_ack_t ack;
     mavlink_msg_command_ack_decode(&msg, &ack);
-    if (ack.command == MAV_CMD_IMAGE_START_CAPTURE) {
-        log_info("Acknowledgement for MAV_CMD_IMAGE_START_CAPTURE recieved");
-        return;
+    log_info("handleAckCB - Acknowledgement for command: %d    -    result: %d", ack.command, ack.result);
+
+    switch (ack.command) {
+        case MAV_CMD_IMAGE_START_CAPTURE:
+            log_info("Acknowledgement for MAV_CMD_IMAGE_START_CAPTURE received");
+            break;
+        case MAV_CMD_REQUEST_VIDEO_STREAM_INFORMATION:
+            log_info("Acknowledgement for MAV_CMD_REQUEST_VIDEO_STREAM_INFORMATION received");
+            break;
+        case MAV_CMD_REQUEST_VIDEO_STREAM_STATUS:
+            log_info("Acknowledgement for MAV_CMD_REQUEST_VIDEO_STREAM_STATUS received");
+            break;
+        default:
+            log_info("Unknown acknowledge received: %d", ack.command);
     }
 }
 
@@ -286,6 +316,9 @@ void Drone::handleMavlinkMessageCB(mavlink_message_t &msg)
         break;
     case MAVLINK_MSG_ID_VIDEO_STREAM_INFORMATION:
         handleVideoStreamInformationCB(msg);
+        break;
+    case MAVLINK_MSG_ID_VIDEO_STREAM_STATUS:
+        handleVideoStreamStatusCB(msg);
         break;
     default:
         log_info("%d  message is not handled.", msg.msgid);
@@ -344,7 +377,7 @@ int main(int argc, char *argv[])
     }
 
     do {
-        log_info("\nSelect an action\n 1.Set Mode\n 2.Get Mode\n 3.Image Capture\n 4.Request Stream information \n 5.Exit");
+        log_info("\nSelect an action\n 1.Set Mode\n 2.Get Mode\n 3.Image Capture\n 4.Request Stream information \n 5.Request Stream status \n 6.Exit");
         int option;
         cin >> option;
         switch (option) {
@@ -394,13 +427,19 @@ int main(int argc, char *argv[])
             sleep(1);
             break;
         }
-        case 5:
+        case 5: {
+            log_info("Requesting video stream status");
+            ctx->getStreamStatus(camera_id);
+            sleep(1);
+            break;
+        }
+        case 6:
             log_info("Exiting application");
             break;
         default:
             log_info("Invalid Selection");
         }
-        if (option == 5)
+        if (option == 6)
             exit(EXIT_FAILURE);
     } while (1);
 
