@@ -52,12 +52,11 @@ CameraServer::CameraServer(const ConfFile &conf, std::string ipAddr)
     std::set<std::string> blackList = readBlacklistDevices(conf);
 
     std::vector<std::string> deviceList = mPluginManager.listCameraDevices();
-    int index = 0;
+
     for (auto deviceID : deviceList) {
-		
-	std::string gstpipe = "pipeline" + std::to_string(index);
-	index = index + 1;
-		
+
+        std::string gstpipe = "pipeline" + deviceID.substr(5);
+
         log_info(" Camera Device:%s    pipeline:%s", deviceID.c_str(), gstpipe.c_str());
 
         // TODO :: check if max camera count reached
