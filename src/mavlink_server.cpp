@@ -83,10 +83,28 @@ MavlinkServer::MavlinkServer(const ConfFile &conf)
         log_info("Use System ID %d, till heartbeat received from Vehicle", DEFAULT_SYSTEM_ID);
     }
 
+   log_debug("Reading HAL3 commands");
+
+   static const ConfFile::OptionsTable hal3_table[] = {
+        {"init", false, ConfFile::parse_str_dup, OPTIONS_TABLE_STRUCT_FIELD(hal3_commands, init)},
+        {"start_recording", false, ConfFile::parse_str_dup, OPTIONS_TABLE_STRUCT_FIELD(hal3_commands, start_recording)},
+        {"stop_recording", false, ConfFile::parse_str_dup, OPTIONS_TABLE_STRUCT_FIELD(hal3_commands, stop_recording)},
+        {"snapshot", false, ConfFile::parse_str_dup, OPTIONS_TABLE_STRUCT_FIELD(hal3_commands, snapshot)},
+    };
+    conf.extract_options("hal3", hal3_table, ARRAY_SIZE(hal3_table), (void *)&hal3);
+
     log_debug("Creating message queue structure");
     mq_server.set_queue_name("hal3.msg");
     mq_server.start(true);
     mq_server.set_single_message_mode(true);
+
+    log_debug("Starting message queue");
+    struct msgbuffer buf = mq_server.get_buffer();
+    strcpy(buf.mtext, hal3.init);
+
+    if(!mq_server.write(buf)) {
+        log_error ("Message_queue failed, client did not read the message \n");
+    }
 
     if (opt.broadcast[0])
         _broadcast_addr.sin_addr.s_addr = inet_addr(opt.broadcast);
