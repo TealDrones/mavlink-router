@@ -99,10 +99,8 @@ MavlinkServer::MavlinkServer(const ConfFile &conf)
     mq_server.set_single_message_mode(true);
 
     log_debug("Starting message queue");
-    struct msgbuffer buf = mq_server.get_buffer();
-    strcpy(buf.mtext, hal3.init);
 
-    if(!mq_server.write(buf)) {
+    if(!mq_server.write(hal3.init)) {
         log_error ("Message_queue failed, client did not read the message \n");
     }
 
@@ -325,11 +323,9 @@ void MavlinkServer::_handle_image_start_capture(const struct sockaddr_in &addr,
 
         if (cmd.target_component == IMX412_COMP_ID) {
 			log_info("Selected snapshot from camera IMX412 \n");
-			struct msgbuffer buf = mq_server.get_buffer();
-			strcpy(buf.mtext, "s:1");
 			success = true;
 
-			if(!mq_server.write(buf)) {
+			if(!mq_server.write(hal3.snapshot)) {
 				log_error ("Message_queue failed, client did not read the message \n");
 				success = false;
 			}
@@ -395,11 +391,9 @@ void MavlinkServer::_handle_video_start_capture(const struct sockaddr_in &addr,
 
         if (cmd.target_component == IMX412_COMP_ID) {
 			log_info("Selected video start from camera IMX412 \n");
-			struct msgbuffer buf = mq_server.get_buffer();
-			strcpy(buf.mtext, "V:id=0,gsize=1280x720,gformat=yuv420,gnode=/dev/video3,vsize=1920x1080,ssize=1920x1080,sformat=jpeg,fpsrange=30-30,codectype=0,bitrate=16");
 			success = true;
 
-			if(!mq_server.write(buf)) {
+			if(!mq_server.write(hal3.start_recording)) {
 				log_error ("Message_queue failed, client did not read the message \n");
 				success = false;
 			}
@@ -471,11 +465,9 @@ void MavlinkServer::_handle_video_stop_capture(const struct sockaddr_in &addr,
 
         if (cmd.target_component == IMX412_COMP_ID) {
 			log_info("Selected video stop from camera IMX412 \n");
-			struct msgbuffer buf = mq_server.get_buffer();
-			strcpy(buf.mtext, "G:id=0,gsize=1280x720,gformat=yuv420,gnode=/dev/video3");
 			success = true;
 
-			if(!mq_server.write(buf)) {
+			if(!mq_server.write(hal3.stop_recording)) {
 				log_error ("Message_queue failed, client did not read the message \n");
 				success = false;
 			}

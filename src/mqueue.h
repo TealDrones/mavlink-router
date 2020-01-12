@@ -7,6 +7,7 @@
 #include <sys/msg.h>
 #include <cstdlib>
 #include <unistd.h>
+#include <cstring>
 
 #define BUFFER_SIZE 200
 #define WAIT_MSECONDS 50
@@ -24,7 +25,7 @@ class mqueue {
     int start (bool);
     void set_queue_name (std::string);
     void set_single_message_mode (bool mode);
-	bool write (msgbuffer);
+	bool write (char*);
 	bool read (msgbuffer*);
 	int get_num_messages ();
 	int get_num_bytes ();
