@@ -157,7 +157,7 @@ static std::map<std::string, std::string> parseUrlQuery(const char *query)
     return map;
 }
 
-VideoStreamRtsp::VideoStreamRtsp(std::shared_ptr<CameraDevice> camDev, std::string ipAddr)
+VideoStreamRtsp::VideoStreamRtsp(std::shared_ptr<CameraDevice> camDev)
     : mCamDev(camDev)
     , mState(STATE_IDLE)
     , mWidth(0)
@@ -165,7 +165,6 @@ VideoStreamRtsp::VideoStreamRtsp(std::shared_ptr<CameraDevice> camDev, std::stri
     , mEncFormat(CameraParameters::VIDEO_CODING_AVC)
     , mHost(DEFAULT_HOST)
     , mPort(DEFAULT_SERVICE_PORT)
-    , mIPaddress(ipAddr)
 {
     log_info("%s Device:%s", __func__, mCamDev->getDeviceId().c_str());
     mPath = "/" + mCamDev->getDeviceId();
@@ -322,16 +321,10 @@ int VideoStreamRtsp::getFormat()
 /* The host/IP/Multicast group to send the packets to */
 int VideoStreamRtsp::setAddress(std::string ipAddr)
 {
-    mIPaddress = ipAddr;
     return 0;
 }
 
 std::string VideoStreamRtsp::getAddress()
-{
-    return mIPaddress;
-}
-
-std::string VideoStreamRtsp::getPath()
 {
     return mPath;
 }

@@ -36,7 +36,7 @@ using namespace std::placeholders;
 #define MAX_MAVLINK_MESSAGE_SIZE 1024
 #define DEFAULT_SYSTEM_ID 1
 #define IMX412_COMP_ID 101
-#define IP_ADDRESS "127.0.0.1"
+#define DEFAULT_IP_ADDRESS "127.0.0.1"
 
 static const float epsilon = std::numeric_limits<float>::epsilon();
 
@@ -67,6 +67,13 @@ MavlinkServer::MavlinkServer(const ConfFile &conf)
         _broadcast_addr.sin_port = htons(opt.port);
     else
         _broadcast_addr.sin_port = htons(DEFAULT_MAVLINK_PORT);
+
+    if (opt.rtsp_server_addr)
+        _rtsp_server_addr = opt.rtsp_server_addr;
+    else
+        _rtsp_server_addr = DEFAULT_IP_ADDRESS;
+
+    log_info("RTSP server address at: %s",_rtsp_server_addr.c_str());
 
     if (opt.sysid) {
         if (opt.sysid > 0 && opt.sysid < 255) {
@@ -185,12 +192,12 @@ void MavlinkServer::_handle_request_video_stream_information(const struct sockad
 			stream_h = 512;
 		}
 
-        stream_name = tgtComp->getVideoStream()->getPath();
+        stream_name = tgtComp->getVideoStream()->getAddress();
         stream_name.erase(0, 1);  //removing letter '/'
 
-        rtsp_path = "rtsp://" + tgtComp->getVideoStream()->getAddress() + ":"
+        rtsp_path = "rtsp://" + _rtsp_server_addr + ":"
 		            + std::to_string (tgtComp->getVideoStream()->getPort())
-		            + tgtComp->getVideoStream()->getPath();
+		            + tgtComp->getVideoStream()->getAddress();
 
         mavlink_msg_video_stream_information_pack(
         _system_id, cmd.target_component, &msg, cmd.target_component - 100, 2, 
