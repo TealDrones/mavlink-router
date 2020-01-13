@@ -404,7 +404,7 @@ int CameraComponent::setVideoFrameFormat(uint32_t param_value)
     return 0;
 }
 
-int CameraComponent::startVideoStream(const bool isUdp, std::string ipAddr)
+int CameraComponent::startVideoStream(const bool isUdp)
 {
     int ret = 0;
 
@@ -420,7 +420,7 @@ int CameraComponent::startVideoStream(const bool isUdp, std::string ipAddr)
     if (isUdp)
         mVidStream = std::make_shared<VideoStreamUdp>(mCamDev);
     else {
-        mVidStream = std::make_shared<VideoStreamRtsp>(mCamDev, ipAddr);
+        mVidStream = std::make_shared<VideoStreamRtsp>(mCamDev);
     }
 
     ret = mVidStream->init();

@@ -47,7 +47,6 @@ static void help(FILE *fp)
         "%s [OPTIONS...]\n\n"
         "  -c --conf-file                   .conf file with configurations for \n"
         "                                   dronecode-camera-manager.\n"
-        "  -i --ipaddress                   IP address for video streaming.\n"
         "  -d --conf-dir <dir>              Directory where to look for .conf files overriding\n"
         "                                   default conf file.\n"
         "  -g --debug-log-level <level>     Set debug log level. Levels are\n"
@@ -179,14 +178,13 @@ static int parse_argv(int argc, char *argv[], struct options *opt)
     static const struct option options[] = {{"conf-file", required_argument, NULL, 'c'},
                                             {"conf-dir", required_argument, NULL, 'd'},
                                             {"debug-log-level", required_argument, NULL, 'g'},
-                                            {"ip-address", required_argument, NULL, 'i'},
                                             {"verbose", no_argument, NULL, 'v'}};
     int c;
 
     assert(argc >= 0);
     assert(argv);
 
-    while ((c = getopt_long(argc, argv, "hd:c:d:i:g:v", options, NULL)) >= 0) {
+    while ((c = getopt_long(argc, argv, "hd:c:d:g:v", options, NULL)) >= 0) {
         switch (c) {
         case 'h':
             help(stdout);
@@ -197,10 +195,6 @@ static int parse_argv(int argc, char *argv[], struct options *opt)
         }
         case 'd': {
             opt->conf_dir = optarg;
-            break;
-        }
-        case 'i': {
-            opt->ip_address = optarg;
             break;
         }
         case 'g': {
@@ -240,7 +234,6 @@ static int parse_argv(int argc, char *argv[], struct options *opt)
 int main(int argc, char *argv[])
 {
     struct options opt = {0};
-    std::string IPaddr;
     Log::open();
 
     ConfFile *conf;
@@ -258,13 +251,7 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    if (opt.ip_address != 0) {
-        IPaddr = opt.ip_address;
-    }
-    else {
-		IPaddr = "127.0.0.1";
-    }
-    CameraServer camServer(*conf, IPaddr);
+    CameraServer camServer(*conf);
     camServer.start();
 
     delete conf;

@@ -36,7 +36,6 @@ public:
     // The host/IP/Multicast group to send the packets to
     virtual int setAddress(std::string ipAddr) = 0;
     virtual std::string getAddress() = 0;
-    virtual std::string getPath() = 0;
     // The port to send the packets to
     virtual int setPort(uint32_t port) = 0;
     virtual int getPort() = 0;
