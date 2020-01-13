@@ -32,6 +32,13 @@ typedef struct image_callback {
     struct sockaddr_in addr; /* Requester address */
 } image_callback_t;
 
+typedef struct _hal3_commands {
+    char *init;
+    char *start_recording;
+    char *stop_recording;
+    char *snapshot;
+} hal3_commands;
+
 class MavlinkServer {
 public:
     MavlinkServer(const ConfFile &conf);
@@ -54,7 +61,7 @@ private:
     mqueue mq_server;
     uint8_t video_status;
     int _tilt;
-    std::string _rtsp_server_addr;
+    hal3_commands hal3 = {};
 
     void _message_received(const struct sockaddr_in &sockaddr, const struct buffer &buf);
     void _handle_mavlink_message(const struct sockaddr_in &addr, mavlink_message_t *msg);

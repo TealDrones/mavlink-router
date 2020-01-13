@@ -8,28 +8,34 @@
 
 int main(void)
 {
-	mqueue client;
+    mqueue client;
 
-	printf("Client for message queue, use ctrl+c to exit.\n");
-	client.set_queue_name("hal3.msg");
-	client.start(false);
+    printf("Client for message queue, use ctrl+c to exit.\n");
+    client.set_queue_name("hal3.msg");
+    client.start(false);
+    int counter = 0;
 
-	for(;;) {
+    for(;;) {
+        struct msgbuffer buf = client.get_buffer();
 
-		struct msgbuffer buf = client.get_buffer();
-		if (!client.read(&buf)) {
-			printf("Unable to read from mqueue server, trying in 5 seconds.\n");
-			sleep(5);
-			client.start(false);
-		}
-		else if (buf.mtext[0] != 0) {
-			/* Print message */
-			printf("Message received: \"%s\"\n", buf.mtext);
-		}
-		
-		/* Checking for messages each 10 milliseconds */
-		usleep(10000);
-	}
+        if (!client.read(&buf)) {
+            counter = counter + 1;
 
-	return 0;
+            if (counter > 250) {
+                printf("Unable to read from mqueue server.\n");
+                counter = 0;
+            }
+            client.start(false);
+        }
+        else if (buf.mtext[0] != 0) {
+            /* Print message */
+            printf("Message received: \"%s\"\n", buf.mtext);
+            counter = 0;
+        }
+
+        /* Checking for messages each 10 milliseconds */
+        usleep(20000);
+    }
+
+    return 0;
 }

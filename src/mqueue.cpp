@@ -39,13 +39,11 @@ int mqueue::start (bool server_mode)
     if (server_mode) {
 		/* Server mode */
 		if ((msqid = msgget(key, 0644 | IPC_CREAT)) == -1) {
-			perror("msgget");
 			return -1;
 		}
 	} else {
 		/* Client mode */
 		if ((msqid = msgget(key, 0644)) == -1) {
-			perror("msgget");
 			return -1;
 		}
 	}
@@ -53,9 +51,12 @@ int mqueue::start (bool server_mode)
 }
 
 /* Write message to message queue */
-bool mqueue::write (msgbuffer buf)
+bool mqueue::write (char* message)
 {
 	bool retval = true;
+
+	struct msgbuffer buf = get_buffer();
+	std::strcpy(buf.mtext, message);
 
 	/* Multiple message mode writes messages to queue without control*/
 	if (!single_message_mode) {
@@ -101,7 +102,6 @@ bool mqueue::read (msgbuffer *buf)
 	/* Using IPC_NOWAIT flag, msgsnd/msgrcv always return -1 with error code ENOMSG */
 	if (msgrcv(msqid, buf, sizeof buf->mtext, 0, MSG_NOERROR|IPC_NOWAIT) == -1) {
 		if (errno != ENOMSG) {
-			perror("msgrcv");
 			return false;
 		}
 	}
