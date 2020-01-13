@@ -1,0 +1,11 @@
+[Unit]
+Description=Hal Tool Service
+After=mavlink-router.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/hal3_test -f /data/teal/dcm/imx412.conf
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -141,8 +141,14 @@ gst-launch-1.0 v4l2src device=/dev/video4 ! videoparse width=1280 height=768 for
 gst-launch-1.0 -vc udpsrc port=5600 ! application/x-rtp, payload=96 ! rtph264depay ! omxh264dec ! videoscale ! videorate ! videoconvert ! autovideosink
 ```
 
-### 
-dronecode camera service
+```bash
+gst-launch-1.0 rtspsrc location="rtsp://10.73.41.91:8554/video3" ! rtph264depay ! h264parse ! omxh264dec ! videoscale ! videorate ! videoconvert ! autovideosink
+
+```
+
+
+
+### dronecode camera service
 ```bash
 systemctl stop dronecode-camera-manager.service
 systemctl start dronecode-camera-manager.service
