@@ -62,6 +62,7 @@ private:
     uint8_t video_status;
     int _tilt;
     hal3_commands hal3 = {};
+    std::string _rtsp_server_addr;
 
     void _message_received(const struct sockaddr_in &sockaddr, const struct buffer &buf);
     void _handle_mavlink_message(const struct sockaddr_in &addr, mavlink_message_t *msg);
