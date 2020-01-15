@@ -33,7 +33,7 @@
 
 #define DEFAULT_CONFFILE "/etc/dcm/main.conf"
 #define DEFAULT_CONF_DIR "/etc/dcm/config.d"
-#define VERSION "0.0.5"
+#define MAIN_VERSION "0.0.5"
 
 struct options {
     const char *filename;
@@ -54,7 +54,7 @@ static void help(FILE *fp)
         "                                   <error|warning|info|debug>\n"
         "  -v --verbose                     Verbose. Same as --debug-log-level=debug\n"
         "  -h --help                        Print this message\n",
-        VERSION, program_invocation_short_name);
+        MAIN_VERSION, program_invocation_short_name);
 }
 
 static const char *get_default_file_name()
