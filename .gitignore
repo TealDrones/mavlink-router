@@ -36,3 +36,4 @@ tags
 /test/test-mavlink-protocol
 /test/test-rtsp-udp-stream-discovery
 /hal3_client
+tools/export_v4l2_param_xml/export_v4l2_param

@@ -200,14 +200,17 @@ void MavlinkServer::_handle_request_video_stream_information(const struct sockad
 
         log_info("STREAM INFORMATION FOR: %d", cmd.target_component);
 
+        int flags;
         if (cmd.target_component == IMX412_COMP_ID) {
 			stream_w = 1280;
 			stream_h = 720;
+            flags = VIDEO_STREAM_STATUS_FLAGS_RUNNING;
 		} else {
 			stream_w = 640;
 			stream_h = 512;
-		}
-
+            flags = VIDEO_STREAM_STATUS_FLAGS_RUNNING;
+//            flaggs = VIDEO_STREAM_STATUS_FLAGS_RUNNING | VIDEO_STREAM_STATUS_FLAGS_THERMAL;
+        }
         stream_name = tgtComp->getVideoStream()->getAddress();
         stream_name.erase(0, 1);  //removing letter '/'
 
@@ -217,7 +220,7 @@ void MavlinkServer::_handle_request_video_stream_information(const struct sockad
 
         mavlink_msg_video_stream_information_pack(
         _system_id, cmd.target_component, &msg, cmd.target_component - 100, 2, 
-        VIDEO_STREAM_TYPE_RTSP, VIDEO_STREAM_STATUS_FLAGS_RUNNING, 30,
+        VIDEO_STREAM_TYPE_RTSP, flags, 30,
         stream_w, stream_h, 4000, 0, 120, stream_name.c_str(), rtsp_path.c_str());
 
         if (!_send_mavlink_message(&addr, msg)) {
@@ -768,6 +771,8 @@ void MavlinkServer::_handle_mavlink_message(const struct sockaddr_in &addr, mavl
 
         case MAV_CMD_DO_MOUNT_CONFIGURE:
         case MAV_CMD_DO_MOUNT_CONTROL:
+            log_info("----------MAV_CMD_DO_MOUNT_STUFF");
+            break;
         default:
             log_info("Command %d unhandled. Discarding.", cmd.command);
             break;

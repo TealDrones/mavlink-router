@@ -72,10 +72,10 @@ static std::string getGstVideoEncoder(CameraParameters::VIDEO_CODING_FORMAT encF
 
     switch (encFormat) {
     case CameraParameters::VIDEO_CODING_AVC:
-        enc = std::string("vaapih264enc");
+        enc = std::string("omxh264enc");
         break;
     default:
-        enc = std::string("vaapih264enc");
+        enc = std::string("omxh264enc");
         break;
     }
 
