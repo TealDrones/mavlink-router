@@ -101,7 +101,7 @@ MavlinkServer::MavlinkServer(const ConfFile &conf)
     conf.extract_options("hal3", hal3_table, ARRAY_SIZE(hal3_table), (void *)&hal3);
 
     log_debug("Creating message queue structure");
-    mq_server.set_queue_name("hal3.msg");
+    mq_server.set_queue_name("/data/teal/mqueue/hal3.msg");
     mq_server.start(true);
     mq_server.set_single_message_mode(true);
 
