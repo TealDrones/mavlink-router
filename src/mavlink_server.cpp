@@ -37,6 +37,8 @@ using namespace std::placeholders;
 #define DEFAULT_SYSTEM_ID 1
 #define IMX412_COMP_ID 101
 #define DEFAULT_IP_ADDRESS "127.0.0.1"
+#define MAX_ZOOM 5
+#define MIN_ZOOM 0
 
 static const float epsilon = std::numeric_limits<float>::epsilon();
 
@@ -117,6 +119,7 @@ MavlinkServer::MavlinkServer(const ConfFile &conf)
         _broadcast_addr.sin_addr.s_addr = inet_addr(DEFAULT_MAVLINK_BROADCAST_ADDR);
     _broadcast_addr.sin_family = AF_INET;
     video_status = 0;
+    zoom_level = 0;
 }
 
 MavlinkServer::~MavlinkServer()
@@ -658,19 +661,35 @@ void MavlinkServer::_handle_reset_camera_settings(const struct sockaddr_in &addr
 
 void MavlinkServer::_handle_camera_zoom(const struct sockaddr_in &addr, mavlink_command_long_t &cmd)
 {
-    log_info("ZOOM:  %s, %f, %f", __func__, cmd.param1, cmd.param2);
-    if ( cmd.param2 != 0.0 ) {
-        _tilt += (int) cmd.param2 * 5;
-        if (_tilt > 25) _tilt = 25;
-        if (_tilt < -25) _tilt = -25;
-        log_info("ZOOM:  %s, %d, %f", __func__, _tilt, cmd.param2);
-    }
+    log_info("ZOOM - %s - CompID: %d - values: %f, %f", __func__, cmd.target_component, cmd.param1, cmd.param2);
     bool success = false;
-    char buffer [100];
-    int n;
-    n = sprintf(buffer, "/opt/teal/sbin/tilt-camera.sh %i",_tilt);
-    if (n && system (buffer)) 
+
+    CameraComponent *tgtComp = getCameraComponent(cmd.target_component);
+    if (tgtComp) {
         success = true;
+
+        if (cmd.target_component == IMX412_COMP_ID) {
+            log_debug("Selected camera IMX412 \n");
+            if ( (int)cmd.param2 == 1 ) {
+                log_debug("ZOOM IN");
+                if (zoom_level < MAX_ZOOM) {
+                    zoom_level = zoom_level + 1;
+                }
+                tgtComp->getVideoStream()->setZoom(zoom_level);
+            }
+            else if ( (int)cmd.param2 == -1){
+                log_debug("ZOOM OUT");
+                if (zoom_level > MIN_ZOOM) {
+                    zoom_level = zoom_level - 1;
+                }
+		        tgtComp->getVideoStream()->setZoom(zoom_level);
+            }
+        }
+        else {
+            log_info("Selected camera BOSON \n");
+        }
+    }
+
     _send_ack(addr, cmd.command, cmd.target_component, success);
 }
 
