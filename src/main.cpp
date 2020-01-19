@@ -33,7 +33,7 @@
 
 #define DEFAULT_CONFFILE "/etc/dcm/main.conf"
 #define DEFAULT_CONF_DIR "/etc/dcm/config.d"
-#define MAIN_VERSION "0.0.6"
+#define MAIN_VERSION "0.0.7"
 
 struct options {
     const char *filename;
