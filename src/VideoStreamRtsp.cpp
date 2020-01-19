@@ -22,6 +22,8 @@
 
 #define DEFAULT_HOST "127.0.0.1"
 #define DEFAULT_SERVICE_PORT 8554
+#define ZOOM_WIDTH_PER_SIDE 80
+#define ZOOM_HEIGHT_PER_SIDE 45
 
 GstRTSPServer *VideoStreamRtsp::mServer = nullptr;
 bool VideoStreamRtsp::isAttach = false;
@@ -173,6 +175,8 @@ VideoStreamRtsp::VideoStreamRtsp(std::shared_ptr<CameraDevice> camDev)
 
     /* Default: Set the RTSP video res same as camera res */
     mCamDev->getSize(mWidth, mHeight);
+    mcrop = NULL;
+    current_zoom = 0;
 }
 
 VideoStreamRtsp::~VideoStreamRtsp()
@@ -205,6 +209,10 @@ int VideoStreamRtsp::uninit()
     }
 
     setState(STATE_IDLE);
+    if (mcrop != NULL) {
+        gst_object_unref (mcrop);
+    }
+
     return 0;
 }
 
@@ -340,6 +348,41 @@ int VideoStreamRtsp::getPort()
     return mPort;
 }
 
+int VideoStreamRtsp::setZoom(int zoom)
+{
+    log_info("Setting ZOOM");
+    current_zoom = zoom;
+    if (mcrop != NULL){
+        g_object_set (mcrop, "left", (int) (zoom * ZOOM_WIDTH_PER_SIDE), NULL);
+        g_object_set (mcrop, "right", (int) (zoom * ZOOM_WIDTH_PER_SIDE), NULL);
+        g_object_set (mcrop, "top", (int) (zoom * ZOOM_HEIGHT_PER_SIDE), NULL);
+        g_object_set (mcrop, "bottom", (int) (zoom * ZOOM_HEIGHT_PER_SIDE), NULL);
+    }
+    return 0;
+}
+
+int VideoStreamRtsp::getCurrZoom()
+{
+    log_info("Getting ZOOM value");
+    return current_zoom;
+}
+
+int VideoStreamRtsp::setcrop(GstElement* element)
+{
+    log_info("Setting crop's pointer");
+    if (element == NULL) {
+        return -1;
+    }
+    mcrop = element;
+    return 0;
+}
+
+GstElement* VideoStreamRtsp::getcrop()
+{
+    log_info("Returning crop's pointer");
+    return mcrop;
+}
+
 int VideoStreamRtsp::getCameraResolution(uint32_t &width, uint32_t &height)
 {
     mCamDev->getSize(width, height);
@@ -363,7 +406,7 @@ std::string VideoStreamRtsp::getGstPipeline(std::map<std::string, std::string> &
         source = "appsrc name=mysrc";
     }
 
-    name = source + " ! " + getGstVideoConvertor() + " ! "
+    name = source + " ! queue ! " + getGstVideoConvertor() + " ! videocrop name=crop ! videoscale ! " + getGstVideoConvertor() + " ! "
         + getGstVideoConvertorCaps(params, mWidth, mHeight) + " ! " + getGstVideoEncoder(mEncFormat)
         + " ! " + getGstRtspVideoSink();
 
@@ -449,6 +492,7 @@ static GstElement *cb_create_element(GstRTSPMediaFactory *factory, const GstRTSP
 
     GError *error = NULL;
     GstElement *pipeline = NULL;
+
     /* create new pipeline */
     pipeline = gst_parse_launch(launch.c_str(), &error);
     if (pipeline == NULL) {
@@ -461,6 +505,15 @@ static GstElement *cb_create_element(GstRTSPMediaFactory *factory, const GstRTSP
         /* a recoverable error was encountered */
         log_warning("recoverable parsing error: %s", error->message);
         g_error_free(error);
+    }
+
+    obj->setcrop(gst_bin_get_by_name (GST_BIN(pipeline), "crop"));
+
+    if (obj->getcrop() == NULL){
+        log_error("VIDEOCROP element not found!");
+    }
+    else {
+        obj->setZoom(obj->getCurrZoom());
     }
 
     /* return if not appsrc pipeline, else configure */

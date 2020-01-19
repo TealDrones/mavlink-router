@@ -53,6 +53,7 @@ public:
     int getMode(int camera_id);
     void getStream(int camera_id);
     void getStreamStatus(int camera_id);
+    void setCameraZoom(int camera_id, int value);
     void imageCapture(int camera_id, int count, int interval);
     std::vector<int> getCameraIdList() const;
     std::string getCameraName(int camera_id) const;
@@ -204,6 +205,15 @@ void Drone::getStreamStatus(int camera_id)
     sendCameraMsg(out_msg);
 }
 
+void Drone::setCameraZoom(int camera_id, int value)
+{
+    mavlink_message_t out_msg;
+    mavlink_msg_command_long_pack(GCS_SYSID, MAV_COMP_ID_ALL, &out_msg, sysid, camera_id,
+                                  MAV_CMD_SET_CAMERA_ZOOM, 0, 1, value, 0, 0, 0, 0, 0);
+    log_info("MAV_CMD_SET_CAMERA_ZOOM sent");
+    sendCameraMsg(out_msg);
+}
+
 void Drone::imageCapture(int camera_id, int count, int interval)
 {
     mavlink_message_t out_msg;
@@ -289,6 +299,12 @@ void Drone::handleAckCB(mavlink_message_t &msg)
             break;
         case MAV_CMD_REQUEST_VIDEO_STREAM_STATUS:
             log_info("Acknowledgement for MAV_CMD_REQUEST_VIDEO_STREAM_STATUS received");
+            break;
+        case MAV_CMD_SET_CAMERA_ZOOM:
+            log_info("Acknowledgement for MAV_CMD_SET_CAMERA_ZOOM received");
+            break;
+        case MAV_CMD_REQUEST_CAMERA_INFORMATION:
+            log_info("Acknowledgement for MAV_CMD_REQUEST_CAMERA_INFORMATION received");
             break;
         default:
             log_info("Unknown acknowledge received: %d", ack.command);
@@ -377,7 +393,7 @@ int main(int argc, char *argv[])
     }
 
     do {
-        log_info("\nSelect an action\n 1.Set Mode\n 2.Get Mode\n 3.Image Capture\n 4.Request Stream information \n 5.Request Stream status \n 6.Exit");
+        log_info("\nSelect an action\n 1.Set Mode\n 2.Get Mode\n 3.Image Capture\n 4.Request Stream information \n 5.Request Stream status \n 5.Request Stream status \n 6.Request Zoom In \n 7.Request Zoom Out \n 8.Exit");
         int option;
         cin >> option;
         switch (option) {
@@ -433,13 +449,25 @@ int main(int argc, char *argv[])
             sleep(1);
             break;
         }
-        case 6:
+        case 6: {
+            log_info("Requesting camera zoom in");
+            ctx->setCameraZoom(camera_id, 1);
+            sleep(1);
+            break;
+        }
+        case 7: {
+            log_info("Requesting camera zoom out");
+            ctx->setCameraZoom(camera_id, -1);
+            sleep(1);
+            break;
+        }
+        case 8:
             log_info("Exiting application");
             break;
         default:
             log_info("Invalid Selection");
         }
-        if (option == 6)
+        if (option == 8)
             exit(EXIT_FAILURE);
     } while (1);
 

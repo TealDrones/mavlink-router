@@ -48,6 +48,10 @@ public:
     // The port to send the packets to
     int setPort(uint32_t port);
     int getPort();
+    int setZoom(int zoom);
+    int getCurrZoom();
+    int setcrop(GstElement* element);
+    GstElement* getcrop();
     int getCameraResolution(uint32_t &width, uint32_t &height);
     CameraParameters::PixelFormat getCameraPixelFormat();
     std::string getGstPipeline(std::map<std::string, std::string> &params);
@@ -70,6 +74,8 @@ private:
     uint32_t mPort;
     uint32_t mIndex;
     std::string mPath;
+    GstElement *mcrop;
+    int current_zoom;
     static GstRTSPServer *mServer;
     static bool isAttach;
     static uint32_t refCnt;
