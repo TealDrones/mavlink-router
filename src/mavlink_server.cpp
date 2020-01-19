@@ -100,14 +100,19 @@ MavlinkServer::MavlinkServer(const ConfFile &conf)
     };
     conf.extract_options("hal3", hal3_table, ARRAY_SIZE(hal3_table), (void *)&hal3);
 
-    log_debug("Creating message queue structure");
-    mq_server.set_queue_name("/data/teal/mqueue/hal3.msg");
-    mq_server.start(true);
-    mq_server.set_single_message_mode(true);
+    log_debug("Creating hal message queue structure");
+    hal_server.set_queue_name("/data/teal/mqueue/hal3.msg");
+    hal_server.start(true);
+    hal_server.set_single_message_mode(true);
+
+    // log_debug("Creating message queue structure");
+    // gimbal_server.set_queue_name("/data/teal/mqueue/gimbal.msg");
+    // gimbal_server.start(true);
+    // gimbal_server.set_single_message_mode(true);
 
     log_debug("Starting message queue");
 
-    if(!mq_server.write(hal3.init)) {
+    if(!hal_server.write(hal3.init)) {
         log_error ("Message_queue failed, client did not read the message \n");
     }
 
@@ -335,13 +340,11 @@ void MavlinkServer::_handle_image_start_capture(const struct sockaddr_in &addr,
 			log_info("Selected snapshot from camera IMX412 \n");
 			success = true;
 
-			if(!mq_server.write(hal3.snapshot)) {
+			if(!hal_server.write(hal3.snapshot)) {
 				log_error ("Message_queue failed, client did not read the message \n");
 				success = false;
 			}
-		}
-		//~ if (system ("/opt/teal/sbin/capture-still.sh")) //used on teal1
-        else if (!tgtComp->startImageCapture(
+		} else if (!tgtComp->startImageCapture(
                (uint32_t)cmd.param2 /*interval*/, (uint32_t)cmd.param3 /*count*/,
                 std::bind(&MavlinkServer::_image_captured_cb, this, cb_data, _1, _2)))
             success = true;
@@ -403,7 +406,7 @@ void MavlinkServer::_handle_video_start_capture(const struct sockaddr_in &addr,
 			log_info("Selected video start from camera IMX412 \n");
 			success = true;
 
-			if(!mq_server.write(hal3.start_recording)) {
+			if(!hal_server.write(hal3.start_recording)) {
 				log_error ("Message_queue failed, client did not read the message \n");
 				success = false;
 			}
@@ -477,7 +480,7 @@ void MavlinkServer::_handle_video_stop_capture(const struct sockaddr_in &addr,
 			log_info("Selected video stop from camera IMX412 \n");
 			success = true;
 
-			if(!mq_server.write(hal3.stop_recording)) {
+			if(!hal_server.write(hal3.stop_recording)) {
 				log_error ("Message_queue failed, client did not read the message \n");
 				success = false;
 			}
@@ -762,7 +765,7 @@ void MavlinkServer::_handle_mavlink_message(const struct sockaddr_in &addr, mavl
             this->_handle_camera_zoom(addr, cmd);
             break;
         case MAV_CMD_REQUEST_VIDEO_STREAM_STATUS:
-            log_info("----------MAV_CMD_REQUEST_VIDEO_STREAM_STATUS");
+            log_info("MAV_CMD_REQUEST_VIDEO_STREAM_STATUS");
             this->_handle_request_video_stream_status(addr, cmd);
             break;
         case MAV_CMD_SET_CAMERA_FOCUS:
@@ -771,7 +774,7 @@ void MavlinkServer::_handle_mavlink_message(const struct sockaddr_in &addr, mavl
 
         case MAV_CMD_DO_MOUNT_CONFIGURE:
         case MAV_CMD_DO_MOUNT_CONTROL:
-            log_info("----------MAV_CMD_DO_MOUNT_STUFF");
+            log_info("----------MAV_CMD_DO_MOUNT_STUFF   **********++++++++++=========----------");
             break;
         default:
             log_info("Command %d unhandled. Discarding.", cmd.command);
@@ -874,6 +877,13 @@ bool _heartbeat_cb(void *data)
         if (!server->_send_mavlink_message(nullptr, msg))
             log_error("Sending HEARTBEAT failed.");
     }
+
+    mavlink_msg_heartbeat_pack(server->_system_id, MAV_COMP_ID_GIMBAL, &msg, MAV_TYPE_GENERIC,
+                                MAV_AUTOPILOT_INVALID, MAV_MODE_PREFLIGHT, 0, MAV_STATE_ACTIVE);
+    if (!server->_send_mavlink_message(nullptr, msg))
+        log_error("Sending HEARTBEAT Gimbal failed.");
+
+
     return true;
 }
 
@@ -901,7 +911,7 @@ void MavlinkServer::stop()
         Mainloop::get_mainloop()->del_timeout(_timeout_handler);
 
     /* Removing message queue */
-	if (mq_server.remove() == -1) {
+	if (hal_server.remove() == -1) {
 		log_error("Failed to remove message queue!");
 		exit(1);
 	}
