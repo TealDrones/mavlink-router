@@ -27,6 +27,7 @@ void mqueue::set_single_message_mode (bool mode)
 /* Starting mqueue instance */
 int mqueue::start (bool server_mode)
 {
+	printf("MQueue: Start \n");
 	key_t key;
 
 	/* Message queue's key */
@@ -53,18 +54,15 @@ int mqueue::start (bool server_mode)
 /* Write message to message queue */
 bool mqueue::write (char* message)
 {
+	printf("MQueue: Write \n");
+
 	bool retval = true;
 
 	struct msgbuffer buf = get_buffer();
 	std::strcpy(buf.mtext, message);
 
 	/* Multiple message mode writes messages to queue without control*/
-	if (!single_message_mode) {
-		if (msgsnd(msqid, &buf, sizeof buf.mtext, 0) == -1) {
-			perror("msgsnd");
-			retval = false;
-		}
-	} else {
+	if (single_message_mode) {
 		/* Single message mode writes one message and waits for client to extract the data */
 		if (get_num_messages () > 0) {
 			printf("Flushing mqueue \n");
@@ -90,6 +88,11 @@ bool mqueue::write (char* message)
 				/* Checking message's status for WAIT_MSECONDS milliseconds */
 				usleep(1000);
 			}
+		}
+	} else { 
+		if (msgsnd(msqid, &buf, sizeof buf.mtext, 0) == -1) {
+			perror("msgsnd");
+			retval = false;
 		}
 	}
 

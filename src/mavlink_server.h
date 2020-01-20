@@ -59,7 +59,8 @@ private:
     int _comp_id;
     int zoom_level;
     std::map<int, CameraComponent *> compIdToObj;
-    mqueue mq_server;
+    mqueue hal_server;
+    mqueue gimbal_server;
     uint8_t video_status;
     int _tilt;
     hal3_commands hal3 = {};
