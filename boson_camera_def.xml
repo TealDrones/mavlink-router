@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<mavlinkcamera>
+    <definition version="1">
+        <model>Boson</model>
+        <vendor>Boson</vendor>
+    </definition>
+    <parameters>
+        <parameter name="camera-mode" type="uint32" default="1" control="0">
+            <description>Camera Mode</description>
+            <options>
+                <option name="still" value="0" />
+                <exclusions>
+                    <exclude>video-size</exclude>
+                </exclusions>
+                <option name="video" value="1" />
+            </options>
+        </parameter>
+    </parameters>
+</mavlinkcamera>
