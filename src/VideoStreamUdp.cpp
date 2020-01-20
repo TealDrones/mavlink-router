@@ -82,6 +82,16 @@ int VideoStreamUdp::getState()
     return mState;
 }
 
+int VideoStreamUdp::setZoom(int zoom)
+{
+    return 0;
+}
+
+int VideoStreamUdp::getCurrZoom()
+{
+    return 0;
+}
+
 int VideoStreamUdp::setState(int state)
 {
     // TODO :: Set state only as per FSM

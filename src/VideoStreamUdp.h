@@ -45,6 +45,8 @@ public:
     // The port to send the packets to
     int setPort(uint32_t port);
     int getPort();
+    int setZoom(int zoom);
+    int getCurrZoom();
     int setTextOverlay(std::string text, int timeSec);
     std::string getTextOverlay();
     GstBuffer *readFrame();
