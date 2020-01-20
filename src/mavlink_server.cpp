@@ -104,12 +104,12 @@ MavlinkServer::MavlinkServer(const ConfFile &conf)
 
 
     log_debug("Creating hal message queue structure");
-    hal_server.set_queue_name("hal3.msg");
+    hal_server.set_queue_name("/data/teal/mqueue/hal3.msg");
     hal_server.start(true);
     hal_server.set_single_message_mode(true);
 
     log_debug("Creating gimbal message queue structure");
-    gimbal_server.set_queue_name("gimbal.msg");
+    gimbal_server.set_queue_name("/data/teal/mqueue/gimbal.msg");
     gimbal_server.start(true);
     gimbal_server.set_single_message_mode(true);
 
