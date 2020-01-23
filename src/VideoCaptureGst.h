@@ -44,6 +44,7 @@ public:
     int setFormat(CameraParameters::VIDEO_FILE_FORMAT fileFormat);
     int setLocation(const std::string vidPath);
     std::string getLocation();
+    std::string getURLNextCapture();
 
 private:
     static int vidCount;
@@ -65,4 +66,5 @@ private:
     CameraParameters::VIDEO_FILE_FORMAT mFileFmt;
     std::string mFilePath;
     GstElement *mPipeline;
+    std::string mURLLastCapture;
 };

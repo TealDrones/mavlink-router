@@ -46,6 +46,11 @@ public:
     int setPort(uint32_t port);
     int getPort();
     int setZoom(int zoom);
+    int setRunning(bool state);
+    bool takeSnapshot(std::string url);
+    bool startRecording(std::string url);
+    bool stopRecording();
+    bool getRunning();
     int getCurrZoom();
     int setTextOverlay(std::string text, int timeSec);
     std::string getTextOverlay();
@@ -66,4 +71,5 @@ private:
     int mOvFrmCnt; // framerate * mOvTime
     GstElement *mPipeline;
     GstElement *mTextOverlay;
+    bool running;
 };

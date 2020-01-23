@@ -75,6 +75,8 @@ public:
     uint8_t getVideoStreamStatus() const;
     int resetCameraSettings(void);
     std::shared_ptr<VideoStream> getVideoStream();
+    std::shared_ptr<ImageCapture> getImageCapture();
+    std::shared_ptr<VideoCapture> getVideoCapture();
 
 private:
     std::string mCamDevName;               /* Camera device name */

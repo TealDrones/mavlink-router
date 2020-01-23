@@ -136,6 +136,16 @@ std::shared_ptr<VideoStream> CameraComponent::getVideoStream()
 	return mVidStream;
 }
 
+std::shared_ptr<ImageCapture> CameraComponent::getImageCapture()
+{
+	return mImgCap;
+}
+
+std::shared_ptr<VideoCapture> CameraComponent::getVideoCapture()
+{
+	return mVidCap;
+}
+
 void CameraComponent::initStorageInfo(struct StorageInfo &storeInfo)
 {
     // TODO:: Fill storage details with real values
@@ -431,6 +441,43 @@ int CameraComponent::startVideoStream(const bool isUdp)
             mVidStream.reset();
         }
     }
+    
+    
+    //-------------------
+    /* Initializing Image capture submodule on component */
+    if (mImgCap)
+        mImgCap.reset();
+
+    // check if settings are available
+    if (mImgSetting)
+        mImgCap = std::make_shared<ImageCaptureGst>(mCamDev, *mImgSetting);
+    else
+        mImgCap = std::make_shared<ImageCaptureGst>(mCamDev);
+
+    if (!mImgPath.empty())
+        mImgCap->setLocation(mImgPath);
+
+    mImgCap->init();
+    //-------------------
+    /*Initializing video capture submodule on component*/
+    
+    if (mVidCap)
+        mVidCap.reset();
+
+    // TODO :: Check if video capture or video streaming is running
+
+    // check if settings are available
+    if (mVidSetting)
+        mVidCap = std::make_shared<VideoCaptureGst>(mCamDev, *mVidSetting);
+    else
+        mVidCap = std::make_shared<VideoCaptureGst>(mCamDev);
+
+    if (!mVidPath.empty())
+        mVidCap->setLocation(mVidPath);
+
+    mVidCap->init();
+    
+    //-------------------------------
 
     return ret;
 }

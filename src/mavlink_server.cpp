@@ -347,13 +347,36 @@ void MavlinkServer::_handle_image_start_capture(const struct sockaddr_in &addr,
 			if(!hal_server.write(hal3.snapshot)) {
 				log_error ("Message_queue failed, client did not read the message \n");
 				success = false;
+				
 			}
-		} else if (!tgtComp->startImageCapture(
-               (uint32_t)cmd.param2 /*interval*/, (uint32_t)cmd.param3 /*count*/,
-                std::bind(&MavlinkServer::_image_captured_cb, this, cb_data, _1, _2)))
-            success = true;
-    }
+		}
+		//~ if (system ("/opt/teal/sbin/capture-still.sh")) //used on teal1
+        else {
+            if (tgtComp->getVideoStream()->getRunning()){
+				log_info("Camera on stream mode detected \n");
+				std::string nexturl = tgtComp->getImageCapture()->getURLNextCapture();
+				mavlink_message_t msg;
+				float q[4] = {0}; // Quaternion of camera orientation
+				success = tgtComp->getVideoStream()->takeSnapshot(nexturl);
+				
+				mavlink_msg_camera_image_captured_pack(
+                    _system_id, cmd.target_component, &msg, 0 /*time_boot_ms*/, 0 /*time_utc*/, 1 /*camera_id*/,
+                    0 /*lat*/, 0 /*lon*/, 0 /*alt*/, 0 /*relative_alt*/, q, 0 /*image_index*/,
+                    success /*capture_result*/, nexturl.c_str() /*file_url*/);
 
+                if (!_send_mavlink_message(&cb_data.addr, msg)) {
+                    log_error("Sending camera image captured failed for camera %d.", cb_data.comp_id);
+                }
+				
+		    }
+		    else {
+                if (!tgtComp->startImageCapture(
+                       (uint32_t)cmd.param2 /*interval*/, (uint32_t)cmd.param3 /*count*/,
+                        std::bind(&MavlinkServer::_image_captured_cb, this, cb_data, _1, _2)))
+                    success = true;
+            }
+        }
+    }
     _send_ack(addr, cmd.command, cmd.target_component, success);
 }
 
@@ -375,16 +398,26 @@ void MavlinkServer::_handle_image_stop_capture(const struct sockaddr_in &addr,
 
 void MavlinkServer::_image_captured_cb(image_callback_t cb_data, int result, int seq_num)
 {
-    log_debug("%s result:%d seq:%d", __func__, result, seq_num);
-    log_debug("Comp Id:%d", cb_data.comp_id);
+    log_info("%s result:%d seq:%d", __func__, result, seq_num);
+    log_info("Comp Id:%d", cb_data.comp_id);
     // TODO :: Fill MAVLINK message with correct info including geo location etc
     bool success = !result;
     mavlink_message_t msg;
     float q[4] = {0}; // Quaternion of camera orientation
+    
+    std::string url = ""; 
+    
+    if (success) {
+        CameraComponent *tgtComp = getCameraComponent(cb_data.comp_id);
+        if (tgtComp) {
+		    url = tgtComp->getImageCapture()->getURLLastCapture();
+		    log_info("Captured CallBack - URL: %s", url.c_str());
+        }
+    }
     mavlink_msg_camera_image_captured_pack(
         _system_id, cb_data.comp_id, &msg, 0 /*time_boot_ms*/, 0 /*time_utc*/, 1 /*camera_id*/,
         0 /*lat*/, 0 /*lon*/, 0 /*alt*/, 0 /*relative_alt*/, q, seq_num /*image_index*/,
-        success /*capture_result*/, 0 /*file_url*/);
+        success /*capture_result*/, url.c_str() /*file_url*/);
 
     if (!_send_mavlink_message(&cb_data.addr, msg)) {
         log_error("Sending camera image captured failed for camera %d.", cb_data.comp_id);
@@ -416,12 +449,26 @@ void MavlinkServer::_handle_video_start_capture(const struct sockaddr_in &addr,
 			}
 		}
 		//if (system ("/opt/teal/sbin/video-start.sh")) {  //used on teal1
-        else if (!tgtComp->startVideoCapture((uint32_t)cmd.param2 /*camera_Capture_status freq*/)) {
-            success = true;
-            video_status = 1;
+        else {
+        
+            if (tgtComp->getVideoStream()->getRunning()){
+				log_info("Camera on stream mode detected \n");
+				log_info("disabled stream+recording!\n");
+				tgtComp->getVideoStream()->stopRecording();
+				usleep(15000);
+				std::string nexturl = tgtComp->getVideoCapture()->getURLNextCapture(); //possible segfault here
+				success = true;
+				success = tgtComp->getVideoStream()->startRecording(nexturl); //disabled stream+recording
+		    }
+		    else {
+ 
+                if (!tgtComp->startVideoCapture((uint32_t)cmd.param2 /*camera_Capture_status freq*/)) {
+                    success = true;
+                    video_status = 1;
+                }
+            }  
         }
     }
-
     _send_ack(addr, cmd.command, cmd.target_component, success);
 }
 
@@ -489,13 +536,22 @@ void MavlinkServer::_handle_video_stop_capture(const struct sockaddr_in &addr,
 				success = false;
 			}
 		}
-		// if (system ("/opt/teal/sbin/video-stop.sh")) { //used on teal1
-        else if (!tgtComp->stopVideoCapture()) {
-            success = true;
-            video_status = 0;
+        else {
+			
+			if (tgtComp->getVideoStream()->getRunning()){
+				log_info("Camera on stream mode detected \n");
+				success = true;
+				success = tgtComp->getVideoStream()->stopRecording(); //disabled stream + recording
+		    }
+		    else {
+ 
+                if (!tgtComp->stopVideoCapture()) {
+                    success = true;
+                    video_status = 0;
+                }
+            }
         }
     }
-
     _send_ack(addr, cmd.command, cmd.target_component, success);
 }
 

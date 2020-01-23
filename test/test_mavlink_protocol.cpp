@@ -54,6 +54,8 @@ public:
     void getStream(int camera_id);
     void getStreamStatus(int camera_id);
     void setCameraZoom(int camera_id, int value);
+    void setStartRecording(int camera_id);
+    void setStopRecording(int camera_id);
     void imageCapture(int camera_id, int count, int interval);
     std::vector<int> getCameraIdList() const;
     std::string getCameraName(int camera_id) const;
@@ -76,6 +78,7 @@ private:
     void handleCameraInformationCB(mavlink_message_t &msg);
     void handleVideoStreamInformationCB(mavlink_message_t &msg);
     void handleVideoStreamStatusCB(mavlink_message_t &msg);
+    void handleImageCapturedCB(mavlink_message_t &msg);
     void handleCameraSettingsCB(mavlink_message_t &msg);
     void handleHeartbeatCB(mavlink_message_t &msg);
     void handleAckCB(mavlink_message_t &msg);
@@ -214,6 +217,24 @@ void Drone::setCameraZoom(int camera_id, int value)
     sendCameraMsg(out_msg);
 }
 
+void Drone::setStartRecording(int camera_id)
+{
+    mavlink_message_t out_msg;
+    mavlink_msg_command_long_pack(GCS_SYSID, MAV_COMP_ID_ALL, &out_msg, sysid, camera_id,
+                                  MAV_CMD_VIDEO_START_CAPTURE, 0, 1, 0, 0, 0, 0, 0, 0);
+    log_info("MAV_CMD_VIDEO_START_CAPTURE sent");
+    sendCameraMsg(out_msg);
+}
+
+void Drone::setStopRecording(int camera_id)
+{
+    mavlink_message_t out_msg;
+    mavlink_msg_command_long_pack(GCS_SYSID, MAV_COMP_ID_ALL, &out_msg, sysid, camera_id,
+                                  MAV_CMD_VIDEO_STOP_CAPTURE, 0, 1, 0, 0, 0, 0, 0, 0);
+    log_info("MAV_CMD_VIDEO_STOP_CAPTURE sent");
+    sendCameraMsg(out_msg);
+}
+
 void Drone::imageCapture(int camera_id, int count, int interval)
 {
     mavlink_message_t out_msg;
@@ -269,6 +290,14 @@ void Drone::handleVideoStreamStatusCB(mavlink_message_t &msg)
     mavlink_video_stream_status_t status;
     mavlink_msg_video_stream_status_decode(&msg, &status);
     log_info("Video Stream Status >> Stream_ID:%d  resolution:%d x %d  hfov:%d ",status.stream_id, status.resolution_h, status.resolution_v, status.hfov);
+}
+
+void Drone::handleImageCapturedCB(mavlink_message_t &msg)
+{
+    log_info("Got MAVLINK_MSG_CAMERA_IMAGE_CAPTURED");
+    mavlink_camera_image_captured_t status;
+    mavlink_msg_camera_image_captured_decode(&msg, &status);
+    log_info("Camera Image Captured >> Camera_ID:%d  URL: %s",status.camera_id, status.file_url);
 }
 
 void Drone::handleCameraSettingsCB(mavlink_message_t &msg)
@@ -336,6 +365,9 @@ void Drone::handleMavlinkMessageCB(mavlink_message_t &msg)
     case MAVLINK_MSG_ID_VIDEO_STREAM_STATUS:
         handleVideoStreamStatusCB(msg);
         break;
+    case MAVLINK_MSG_ID_CAMERA_IMAGE_CAPTURED:
+        handleImageCapturedCB(msg);
+        break;
     default:
         log_info("%d  message is not handled.", msg.msgid);
     }
@@ -393,7 +425,7 @@ int main(int argc, char *argv[])
     }
 
     do {
-        log_info("\nSelect an action\n 1.Set Mode\n 2.Get Mode\n 3.Image Capture\n 4.Request Stream information \n 5.Request Stream status \n 5.Request Stream status \n 6.Request Zoom In \n 7.Request Zoom Out \n 8.Exit");
+        log_info("\nSelect an action\n 1.Set Mode\n 2.Get Mode\n 3.Image Capture\n 4.Request Stream information \n 5.Request Stream status \n 6.Request Zoom In \n 7.Request Zoom Out \n 8 Start recording \n 9.Stop Recording \n 10.Exit");
         int option;
         cin >> option;
         switch (option) {
@@ -461,13 +493,25 @@ int main(int argc, char *argv[])
             sleep(1);
             break;
         }
-        case 8:
+        case 8: {
+            log_info("Requesting start recording");
+            ctx->setStartRecording(camera_id);
+            sleep(1);
+            break;
+        }
+        case 9: {
+            log_info("Requesting stop recording");
+            ctx->setStopRecording(camera_id);
+            sleep(1);
+            break;
+        }
+        case 10:
             log_info("Exiting application");
             break;
         default:
             log_info("Invalid Selection");
         }
-        if (option == 8)
+        if (option == 10)
             exit(EXIT_FAILURE);
     } while (1);
 

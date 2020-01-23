@@ -40,6 +40,7 @@ VideoStreamUdp::VideoStreamUdp(std::shared_ptr<CameraDevice> camDev)
 
     mOvText = mCamDev->getDeviceId();
     mOvFrmCnt = mOvTime * 25;
+    running = false;
 }
 
 VideoStreamUdp::~VideoStreamUdp()
@@ -89,6 +90,32 @@ int VideoStreamUdp::setZoom(int zoom)
 
 int VideoStreamUdp::getCurrZoom()
 {
+    return 0;
+}
+
+bool VideoStreamUdp::getRunning()
+{
+    return running;
+}
+
+bool VideoStreamUdp::takeSnapshot(std::string url)
+{
+    return true;
+}
+
+bool VideoStreamUdp::startRecording(std::string url)
+{
+    return true;
+}
+
+bool VideoStreamUdp::stopRecording()
+{
+    return true;
+}
+
+int VideoStreamUdp::setRunning(bool state)
+{
+	running = state;
     return 0;
 }
 

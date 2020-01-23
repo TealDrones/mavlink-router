@@ -38,6 +38,8 @@ public:
     int setFormat(CameraParameters::IMAGE_FILE_FORMAT imgFormat);
     int setLocation(const std::string imgPath);
     std::shared_ptr<CameraDevice> mCamDev;
+    std::string getURLLastCapture();
+    std::string getURLNextCapture();
 
 private:
     static int imgCount;
@@ -57,6 +59,7 @@ private:
     CameraParameters::IMAGE_FILE_FORMAT mFormat; /* Image File Format*/
     uint32_t mInterval;                          /* Image Capture interval */
     std::string mPath;                           /* Image File Destination Path*/
+    std::string mURLLastCapture;
     uint32_t mCamWidth;                          /* Camera Frame Width*/
     uint32_t mCamHeight;                         /* Camera Frame Height*/
     CameraParameters::PixelFormat mCamPixFormat; /* Camera Frame Pixel Format*/
