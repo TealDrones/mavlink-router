@@ -326,8 +326,8 @@ bool Endpoint::accept_msg(int target_sysid, int target_compid, uint8_t src_sysid
     if (has_sys_comp_id(src_sysid, src_compid))
         return false;
 
-    if (msg_id != UINT32_MAX && 
-        _message_filter.size() > 0 && 
+    if (msg_id != UINT32_MAX &&
+        _message_filter.size() > 0 &&
         std::find(_message_filter.begin(), _message_filter.end(), msg_id) == _message_filter.end()) {
 
         // if filter is defined and message is not in the set then discard it
@@ -711,9 +711,34 @@ int UartEndpoint::add_speeds(std::vector<unsigned long> bauds)
 }
 
 UdpEndpoint::UdpEndpoint()
-    : Endpoint{"UDP"}
+    : Endpoint{"UDP"},
+    _write_scheduled(false),
+    _nagle_buf_max_packet_size(1200),
+    _nagle_max_timeout_ms(1)
 {
     bzero(&sockaddr, sizeof(sockaddr));
+    _write_schedule_timer = Mainloop::get_instance().add_timeout(
+        _nagle_max_timeout_ms, [this](void*)
+            {
+                _write_scheduled = false;
+
+                int bytes_remaining = _write_internal_buffer();
+                if (bytes_remaining > 0)
+                {
+                   _reschedule_write();
+                }
+                return true;
+            },
+        this);
+}
+
+
+UdpEndpoint::~UdpEndpoint()
+{
+    if (_write_schedule_timer) {
+        Mainloop::get_instance().del_timeout(_write_schedule_timer);
+        _write_schedule_timer = nullptr;
+    }
 }
 
 int UdpEndpoint::open(const char *ip, unsigned long port, bool to_bind)
@@ -775,14 +800,37 @@ ssize_t UdpEndpoint::_read_msg(uint8_t *buf, size_t len)
 
 int UdpEndpoint::write_msg(const struct buffer *pbuf)
 {
+    if (tx_buf.len + pbuf->len > TX_BUF_MAX_SIZE)
+    {
+        log_debug("Dropping message, tx buffer full");
+        return 0;
+    }
+    memcpy(&tx_buf.data[tx_buf.len], pbuf->data, pbuf->len);
+    tx_buf.len += pbuf->len;
+
+    if (tx_buf.len >= _nagle_buf_max_packet_size)
+    {
+        int bytes_remaining = _write_internal_buffer();
+        if (bytes_remaining > 0)
+        {
+            _reschedule_write();
+        }
+    } else if (!_write_scheduled) {
+        _reschedule_write();
+    }
+    return pbuf->len;
+}
+
+int UdpEndpoint::_write_internal_buffer()
+{
+    if (tx_buf.len == 0) {
+        log_debug("No data in tx buffer, skipping write");
+        return 0;
+    }
+
     if (fd < 0) {
         log_error("Trying to write invalid fd");
         return -EINVAL;
-    }
-
-    /* TODO: send any pending data */
-    if (tx_buf.len > 0) {
-        ;
     }
 
     if (!sockaddr.sin_port) {
@@ -790,7 +838,7 @@ int UdpEndpoint::write_msg(const struct buffer *pbuf)
         return 0;
     }
 
-    ssize_t r = ::sendto(fd, pbuf->data, pbuf->len, 0,
+    ssize_t r = ::sendto(fd, tx_buf.data, tx_buf.len, 0,
                          (struct sockaddr *)&sockaddr, sizeof(sockaddr));
     if (r == -1) {
         if (errno != EAGAIN && errno != ECONNREFUSED && errno != ENETUNREACH)
@@ -799,17 +847,21 @@ int UdpEndpoint::write_msg(const struct buffer *pbuf)
     };
 
     _stat.write.total++;
-    _stat.write.bytes += pbuf->len;
+    _stat.write.bytes += r;
 
-    /* Incomplete packet, we warn and discard the rest */
-    if (r != (ssize_t) pbuf->len) {
-        _incomplete_msgs++;
-        log_debug("Discarding packet, incomplete write %zd but len=%u", r, pbuf->len);
-    }
+    tx_buf.len = std::max(ssize_t(0), (ssize_t)tx_buf.len - r);
+    // memcpy isn't safe for overlapping regions
+    memmove(tx_buf.data, &tx_buf.data[r], tx_buf.len);
 
     log_debug("UDP: [%d] wrote %zd bytes", fd, r);
 
-    return r;
+    return tx_buf.len;
+}
+
+void UdpEndpoint::_reschedule_write()
+{
+    Mainloop::get_instance().set_timeout(_write_schedule_timer, _nagle_max_timeout_ms);
+    _write_scheduled = true;
 }
 
 TcpEndpoint::TcpEndpoint()

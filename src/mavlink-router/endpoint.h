@@ -175,7 +175,7 @@ private:
 class UdpEndpoint : public Endpoint {
 public:
     UdpEndpoint();
-    virtual ~UdpEndpoint() {}
+    virtual ~UdpEndpoint();
 
     int write_msg(const struct buffer *pbuf) override;
     int flush_pending_msgs() override { return -ENOSYS; }
@@ -185,6 +185,14 @@ public:
     struct sockaddr_in sockaddr;
 
 protected:
+
+    void _reschedule_write();
+    int _write_internal_buffer();
+    bool _write_scheduled;
+
+    Timeout* _write_schedule_timer = nullptr;
+    const unsigned int _nagle_buf_max_packet_size, _nagle_max_timeout_ms;
+
     ssize_t _read_msg(uint8_t *buf, size_t len) override;
 };
 
