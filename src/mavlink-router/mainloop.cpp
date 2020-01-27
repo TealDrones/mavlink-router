@@ -683,7 +683,7 @@ void Mainloop::set_timeout(Timeout *t, uint32_t timeout_msec)
 
 void Mainloop::del_timeout(Timeout *t)
 {
-    if (t) {
+    if (_timeouts && t) {
         t->remove_me = true;
     }
 }
