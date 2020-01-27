@@ -191,7 +191,7 @@ protected:
 class TcpEndpoint : public Endpoint {
 public:
     TcpEndpoint();
-    ~TcpEndpoint();
+    virtual ~TcpEndpoint();
 
     int accept(int listener_fd);
     int open(const char *ip, unsigned long port);
