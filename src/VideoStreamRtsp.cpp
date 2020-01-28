@@ -180,6 +180,7 @@ VideoStreamRtsp::VideoStreamRtsp(std::shared_ptr<CameraDevice> camDev)
     fsvideo = NULL;
     vimage = NULL;
     vvideo = NULL;
+    encvideo = NULL;
     current_zoom = 0;
     running = false;
     URLLastRecording = "";
@@ -372,9 +373,15 @@ bool VideoStreamRtsp::takeSnapshot(std::string url)
 {
     log_info("Snapshot from video stream - URL: %s", url.c_str());
     if ((fsimage != NULL) && (vimage != NULL)){
+
+        gst_element_set_state(fsimage, GST_STATE_NULL);
+        usleep(15000);
         g_object_set (fsimage, "location", url.c_str(), NULL);
+        usleep(15000);
+        gst_element_set_state(fsimage, GST_STATE_PLAYING);
+        usleep(30000);
         g_object_set (vimage, "drop", false, NULL);
-        usleep(75000);
+        usleep(50000);
         g_object_set (vimage, "drop", true, NULL);
         return true;
     }
@@ -385,10 +392,12 @@ bool VideoStreamRtsp::startRecording(std::string url)
 {
     log_info("Starting recording from video stream - URL: %s", url.c_str());
     if ((fsvideo != NULL) && (vvideo != NULL)){
-		gst_element_set_state(fsvideo, GST_STATE_NULL);
-		usleep(30000);
+        gst_element_set_state(fsvideo, GST_STATE_NULL);
+        gst_element_set_state(encvideo, GST_STATE_NULL);
+        usleep(30000);
         g_object_set (fsvideo, "location", url.c_str(), NULL);
         usleep(30000);
+        gst_element_set_state(encvideo, GST_STATE_PLAYING);
         gst_element_set_state(fsvideo, GST_STATE_PLAYING);
         usleep(30000);
         g_object_set (vvideo, "drop", false, NULL);
@@ -400,12 +409,9 @@ bool VideoStreamRtsp::startRecording(std::string url)
 
 bool VideoStreamRtsp::stopRecording()
 {
-    log_info("Stopping recording from video stream");
+    log_debug("Stopping recording from video stream");
     if ((fsvideo != NULL) && (vvideo != NULL)){
-		std::string cmd = "mv /tmp/recording.ts " + URLLastRecording;
         g_object_set (vvideo, "drop", true, NULL);
-        //log_info("Moving /tmp/recording.ts to:%s", URLLastRecording.c_str());
-        //system (cmd.c_str());
         return true;
     }
     return false;
@@ -419,7 +425,7 @@ int VideoStreamRtsp::getCurrZoom()
 
 int VideoStreamRtsp::setcrop(GstElement* element)
 {
-    log_info("Setting crop's pointer");
+    log_debug("Setting crop's pointer");
     if (element == NULL) {
         return -1;
     }
@@ -429,7 +435,7 @@ int VideoStreamRtsp::setcrop(GstElement* element)
 
 int VideoStreamRtsp::setfsimage(GstElement* element)
 {
-    log_info("Setting fsimage's pointer");
+    log_debug("Setting fsimage's pointer");
     if (element == NULL) {
         return -1;
     }
@@ -439,7 +445,7 @@ int VideoStreamRtsp::setfsimage(GstElement* element)
 
 int VideoStreamRtsp::setfsvideo(GstElement* element)
 {
-    log_info("Setting fsvideo's pointer");
+    log_debug("Setting fsvideo's pointer");
     if (element == NULL) {
         return -1;
     }
@@ -449,7 +455,7 @@ int VideoStreamRtsp::setfsvideo(GstElement* element)
 
 int VideoStreamRtsp::setvimage(GstElement* element)
 {
-    log_info("Setting vimage's pointer");
+    log_debug("Setting vimage's pointer");
     if (element == NULL) {
         return -1;
     }
@@ -459,7 +465,7 @@ int VideoStreamRtsp::setvimage(GstElement* element)
 
 int VideoStreamRtsp::setvvideo(GstElement* element)
 {
-    log_info("Setting vvideo's pointer");
+    log_debug("Setting vvideo's pointer");
     if (element == NULL) {
         return -1;
     }
@@ -467,9 +473,19 @@ int VideoStreamRtsp::setvvideo(GstElement* element)
     return 0;
 }
 
+int VideoStreamRtsp::setencvideo(GstElement* element)
+{
+    log_debug("Setting encvideo's pointer");
+    if (element == NULL) {
+        return -1;
+    }
+    encvideo = element;
+    return 0;
+}
+
 int VideoStreamRtsp::setpipeline(GstElement* element)
 {
-    log_info("Setting pipeline's pointer");
+    log_debug("Setting pipeline's pointer");
     if (element == NULL) {
         return -1;
     }
@@ -479,44 +495,50 @@ int VideoStreamRtsp::setpipeline(GstElement* element)
 
 int VideoStreamRtsp::setRunning(bool state)
 {
-    log_info("Setting running state  - From %d to %d",running ,state);
+    log_debug("Setting running state  - From %d to %d",running ,state);
     running = state;
     return 0;
 }
 
 bool VideoStreamRtsp::getRunning()
 {
-    log_info("Getting running state: %d", running);
+    log_debug("Getting running state: %d", running);
     return running;
 }
 
 GstElement* VideoStreamRtsp::getcrop()
 {
-    log_info("Returning crop's pointer");
+    log_debug("Returning crop's pointer");
     return mcrop;
 }
 
 GstElement* VideoStreamRtsp::getfsimage()
 {
-    log_info("Returning fsimage's pointer");
+    log_debug("Returning fsimage's pointer");
     return fsimage;
 }
 
 GstElement* VideoStreamRtsp::getfsvideo()
 {
-    log_info("Returning fsvideo's pointer");
+    log_debug("Returning fsvideo's pointer");
     return fsvideo;
+}
+
+GstElement* VideoStreamRtsp::getencvideo()
+{
+    log_debug("Returning encvideo's pointer");
+    return encvideo;
 }
 
 GstElement* VideoStreamRtsp::getvimage()
 {
-    log_info("Returning vimage's pointer");
+    log_debug("Returning vimage's pointer");
     return vimage;
 }
 
 GstElement* VideoStreamRtsp::getvvideo()
 {
-    log_info("Returning vvideo's pointer");
+    log_debug("Returning vvideo's pointer");
     return vvideo;
 }
 
@@ -545,7 +567,7 @@ std::string VideoStreamRtsp::getGstPipeline(std::map<std::string, std::string> &
 
     name = source + " ! queue ! " + getGstVideoConvertor() + " ! videocrop name=crop ! videoscale ! " + getGstVideoConvertor() + " ! "
         + getGstVideoConvertorCaps(params, mWidth, mHeight) + " ! tee name=traw traw. ! " + getGstVideoEncoder(mEncFormat) + " ! h264parse ! "
-        + " tee name=tenc tenc. ! " + getGstRtspVideoSink() + " traw. ! queue  ! valve name=vvideo drop=true ! " + getGstVideoEncoder(mEncFormat) + " ! h264parse ! " +
+        + " tee name=tenc tenc. ! " + getGstRtspVideoSink() + " traw. ! queue  ! valve name=vvideo drop=true ! " + getGstVideoEncoder(mEncFormat) + " name=encvideo " + " ! h264parse ! " +
         + " mpegtsmux ! tsparse ! multifilesink name=fsvideo location=/tmp/recording.ts async=false next-file=1 traw. ! queue ! valve name=vimage drop=true ! jpegenc ! queue ! multifilesink name=fsimage location=/tmp/img__%0004d.jpg async=false ";
 
     log_debug("%s:%s", __func__, name.c_str());
@@ -644,14 +666,13 @@ static GstElement *cb_create_element(GstRTSPMediaFactory *factory, const GstRTSP
         log_warning("recoverable parsing error: %s", error->message);
         g_error_free(error);
     }
-    
-    obj->setvvideo(pipeline);
 
     obj->setcrop(gst_bin_get_by_name (GST_BIN(pipeline), "crop"));
     obj->setfsimage(gst_bin_get_by_name (GST_BIN(pipeline), "fsimage"));
     obj->setfsvideo(gst_bin_get_by_name (GST_BIN(pipeline), "fsvideo"));
     obj->setvimage(gst_bin_get_by_name (GST_BIN(pipeline), "vimage"));
     obj->setvvideo(gst_bin_get_by_name (GST_BIN(pipeline), "vvideo"));
+    obj->setencvideo(gst_bin_get_by_name (GST_BIN(pipeline), "encvideo"));
 
     if (obj->getcrop() == NULL){
         log_debug("VIDEOCROP element not found!");
@@ -671,6 +692,9 @@ static GstElement *cb_create_element(GstRTSPMediaFactory *factory, const GstRTSP
     }
     if (obj->getvvideo() == NULL){
         log_debug("VVIDEO element not found!");
+    }
+    if (obj->getencvideo() == NULL){
+        log_debug("ENCVIDEO element not found!");
     }
 
     /* return if not appsrc pipeline, else configure */

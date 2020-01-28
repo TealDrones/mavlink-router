@@ -340,26 +340,40 @@ int CameraComponent::startVideoCapture(int status_freq)
     log_info("CAMERA_CAPTURE_STATUS frequency %1d", status_freq);
     int ret = 0;
 
-    if (mVidCap)
-        mVidCap.reset();
+    if (mVidCap){
+       log_info("Video capture instance enabled");
+    }
+    else{
+        log_info("Creating new video capture pointer using settings");
+        mVidCap = std::make_shared<VideoCaptureGst>(mCamDev, *mVidSetting); //added GF
+    }
 
     // TODO :: Check if video capture or video streaming is running
 
     // check if settings are available
-    if (mVidSetting)
-        mVidCap = std::make_shared<VideoCaptureGst>(mCamDev, *mVidSetting);
-    else
-        mVidCap = std::make_shared<VideoCaptureGst>(mCamDev);
+    //~ if (mVidSetting){
+		//~ log_info("Creating new video capture pointer using settings");
+        //~ mVidCap = std::make_shared<VideoCaptureGst>(mCamDev, *mVidSetting);
+    //~ }
+    //~ else{
+		//~ log_info("Creating new video capture pointer with only device information");
+        //~ mVidCap = std::make_shared<VideoCaptureGst>(mCamDev);
+    //~ }
 
     if (!mVidPath.empty())
         mVidCap->setLocation(mVidPath);
 
+    mVidCap->stop();
+    mVidCap->uninit();
+
     ret = mVidCap->init();
+    log_info("init video capture");
+
     if (!ret) {
         ret = mVidCap->start();
         if (ret) {
             mVidCap->uninit();
-            mVidCap.reset();
+            log_info("Reseting video capture, fail to set states");
         }
     }
 
@@ -375,7 +389,6 @@ int CameraComponent::stopVideoCapture()
 
     mVidCap->stop();
     mVidCap->uninit();
-    mVidCap.reset();
 
     return ret;
 }
@@ -441,9 +454,7 @@ int CameraComponent::startVideoStream(const bool isUdp)
             mVidStream.reset();
         }
     }
-    
-    
-    //-------------------
+
     /* Initializing Image capture submodule on component */
     if (mImgCap)
         mImgCap.reset();
@@ -458,26 +469,16 @@ int CameraComponent::startVideoStream(const bool isUdp)
         mImgCap->setLocation(mImgPath);
 
     mImgCap->init();
-    //-------------------
+
     /*Initializing video capture submodule on component*/
     
-    if (mVidCap)
-        mVidCap.reset();
-
-    // TODO :: Check if video capture or video streaming is running
-
-    // check if settings are available
-    if (mVidSetting)
+    if (!mVidCap)
         mVidCap = std::make_shared<VideoCaptureGst>(mCamDev, *mVidSetting);
-    else
-        mVidCap = std::make_shared<VideoCaptureGst>(mCamDev);
 
     if (!mVidPath.empty())
         mVidCap->setLocation(mVidPath);
 
     mVidCap->init();
-    
-    //-------------------------------
 
     return ret;
 }
