@@ -65,6 +65,8 @@ public:
     GstElement* getvimage();
     int setvvideo(GstElement* element);
     GstElement* getvvideo();
+    int setencvideo(GstElement* element);
+    GstElement* getencvideo();
     int setpipeline(GstElement* element);
     int getCameraResolution(uint32_t &width, uint32_t &height);
     CameraParameters::PixelFormat getCameraPixelFormat();
@@ -93,6 +95,7 @@ private:
     GstElement *fsvideo;
     GstElement *vimage;
     GstElement *vvideo;
+    GstElement *encvideo;
     GstElement *mpipeline;
     int current_zoom;
     bool running;

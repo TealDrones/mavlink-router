@@ -334,10 +334,10 @@ std::string ImageCaptureGst::getURLLastCapture()
 
 std::string ImageCaptureGst::getURLNextCapture()
 {
-	log_info("Creating next url for snapshot from video stream");
-	std::string ext = getImgExt(mFormat);
-	mURLLastCapture = mPath + "img_" + std::to_string(++imgCount) + "." + ext;
-	return mURLLastCapture;
+    log_debug("Creating next url for snapshot from video stream");
+    std::string ext = getImgExt(mFormat);
+    mURLLastCapture = mPath + "img_" + std::to_string(++imgCount) + "." + ext;
+    return mURLLastCapture;
 }
 
 std::string ImageCaptureGst::getGstPipelineNameV4l2()

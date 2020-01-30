@@ -335,6 +335,12 @@ void Drone::handleAckCB(mavlink_message_t &msg)
         case MAV_CMD_REQUEST_CAMERA_INFORMATION:
             log_info("Acknowledgement for MAV_CMD_REQUEST_CAMERA_INFORMATION received");
             break;
+        case MAV_CMD_VIDEO_START_CAPTURE:
+            log_info("Acknowledgement for MAV_CMD_VIDEO_START_CAPTURE received");
+            break;
+        case MAV_CMD_VIDEO_STOP_CAPTURE:
+            log_info("Acknowledgement for MAV_CMD_VIDEO_STOP_CAPTURE received");
+            break;
         default:
             log_info("Unknown acknowledge received: %d", ack.command);
     }

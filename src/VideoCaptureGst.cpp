@@ -91,7 +91,7 @@ int VideoCaptureGst::uninit()
     log_info("%s::%s", typeid(this).name(), __func__);
 
     if (getState() != STATE_INIT && getState() != STATE_ERROR) {
-        log_error("Invalid State : %d", getState());
+        log_debug("Unexpected state : %d", getState());
         return -1;
     }
 
@@ -128,7 +128,7 @@ int VideoCaptureGst::stop()
     log_info("%s::%s", typeid(this).name(), __func__);
 
     if (getState() != STATE_RUN) {
-        log_error("Invalid State : %d", getState());
+        log_debug("Capture is not in RUN State : %d", getState());
         return -1;
     }
 
@@ -189,10 +189,9 @@ int VideoCaptureGst::getState()
 
 std::string VideoCaptureGst::getURLNextCapture()
 {
-	log_info("Creating next url for video capture from video stream");
-	std::string ext = getFileExt(mFileFmt);
-	mURLLastCapture = mFilePath + "vid_" + std::to_string(++vidCount) + "." + ext;
-	
+    log_debug("Creating next url for video capture from video stream");
+    std::string ext = getFileExt(mFileFmt);
+    mURLLastCapture = mFilePath + "vid_" + std::to_string(++vidCount) + "." + ext;
     return mURLLastCapture;
 }
 
