@@ -38,3 +38,8 @@ tags
 /hal3_client
 tools/export_v4l2_param_xml/export_v4l2_param
 .vscode/
+/bin/
+
+.project
+
+.classpath
