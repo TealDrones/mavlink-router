@@ -74,10 +74,10 @@ static std::string getGstVideoEncoder(CameraParameters::VIDEO_CODING_FORMAT encF
 
     switch (encFormat) {
     case CameraParameters::VIDEO_CODING_AVC:
-        enc = std::string("omxh264enc");
+        enc = std::string("omxh264enc"); //omxh264enc->hadron, x264enc->x86
         break;
     default:
-        enc = std::string("omxh264enc");
+        enc = std::string("omxh264enc"); //omxh264enc->hadron, x264enc->x86
         break;
     }
 
@@ -176,7 +176,14 @@ VideoStreamRtsp::VideoStreamRtsp(std::shared_ptr<CameraDevice> camDev)
     /* Default: Set the RTSP video res same as camera res */
     mCamDev->getSize(mWidth, mHeight);
     mcrop = NULL;
+    fsimage = NULL;
+    fsvideo = NULL;
+    vimage = NULL;
+    vvideo = NULL;
+    encvideo = NULL;
     current_zoom = 0;
+    running = false;
+    URLLastRecording = "";
 }
 
 VideoStreamRtsp::~VideoStreamRtsp()
@@ -247,6 +254,7 @@ int VideoStreamRtsp::stop()
 
     ret = stopRtspServer();
     setState(STATE_INIT);
+    
     return ret;
 }
 
@@ -361,6 +369,54 @@ int VideoStreamRtsp::setZoom(int zoom)
     return 0;
 }
 
+bool VideoStreamRtsp::takeSnapshot(std::string url)
+{
+    log_info("Snapshot from video stream - URL: %s", url.c_str());
+    if ((fsimage != NULL) && (vimage != NULL)){
+
+        gst_element_set_state(fsimage, GST_STATE_NULL);
+        usleep(15000);
+        g_object_set (fsimage, "location", url.c_str(), NULL);
+        usleep(15000);
+        gst_element_set_state(fsimage, GST_STATE_PLAYING);
+        usleep(30000);
+        g_object_set (vimage, "drop", false, NULL);
+        usleep(50000);
+        g_object_set (vimage, "drop", true, NULL);
+        return true;
+    }
+    return false;
+}
+
+bool VideoStreamRtsp::startRecording(std::string url)
+{
+    log_info("Starting recording from video stream - URL: %s", url.c_str());
+    if ((fsvideo != NULL) && (vvideo != NULL)){
+        gst_element_set_state(fsvideo, GST_STATE_NULL);
+        gst_element_set_state(encvideo, GST_STATE_NULL);
+        usleep(30000);
+        g_object_set (fsvideo, "location", url.c_str(), NULL);
+        usleep(30000);
+        gst_element_set_state(encvideo, GST_STATE_PLAYING);
+        gst_element_set_state(fsvideo, GST_STATE_PLAYING);
+        usleep(30000);
+        g_object_set (vvideo, "drop", false, NULL);
+        URLLastRecording = url;
+        return true;
+    }
+    return false;
+}
+
+bool VideoStreamRtsp::stopRecording()
+{
+    log_debug("Stopping recording from video stream");
+    if ((fsvideo != NULL) && (vvideo != NULL)){
+        g_object_set (vvideo, "drop", true, NULL);
+        return true;
+    }
+    return false;
+}
+
 int VideoStreamRtsp::getCurrZoom()
 {
     log_info("Getting ZOOM value");
@@ -369,7 +425,7 @@ int VideoStreamRtsp::getCurrZoom()
 
 int VideoStreamRtsp::setcrop(GstElement* element)
 {
-    log_info("Setting crop's pointer");
+    log_debug("Setting crop's pointer");
     if (element == NULL) {
         return -1;
     }
@@ -377,10 +433,113 @@ int VideoStreamRtsp::setcrop(GstElement* element)
     return 0;
 }
 
+int VideoStreamRtsp::setfsimage(GstElement* element)
+{
+    log_debug("Setting fsimage's pointer");
+    if (element == NULL) {
+        return -1;
+    }
+    fsimage = element;
+    return 0;
+}
+
+int VideoStreamRtsp::setfsvideo(GstElement* element)
+{
+    log_debug("Setting fsvideo's pointer");
+    if (element == NULL) {
+        return -1;
+    }
+    fsvideo = element;
+    return 0;
+}
+
+int VideoStreamRtsp::setvimage(GstElement* element)
+{
+    log_debug("Setting vimage's pointer");
+    if (element == NULL) {
+        return -1;
+    }
+    vimage = element;
+    return 0;
+}
+
+int VideoStreamRtsp::setvvideo(GstElement* element)
+{
+    log_debug("Setting vvideo's pointer");
+    if (element == NULL) {
+        return -1;
+    }
+    vvideo = element;
+    return 0;
+}
+
+int VideoStreamRtsp::setencvideo(GstElement* element)
+{
+    log_debug("Setting encvideo's pointer");
+    if (element == NULL) {
+        return -1;
+    }
+    encvideo = element;
+    return 0;
+}
+
+int VideoStreamRtsp::setpipeline(GstElement* element)
+{
+    log_debug("Setting pipeline's pointer");
+    if (element == NULL) {
+        return -1;
+    }
+    mpipeline = element;
+    return 0;
+}
+
+int VideoStreamRtsp::setRunning(bool state)
+{
+    log_debug("Setting running state  - From %d to %d",running ,state);
+    running = state;
+    return 0;
+}
+
+bool VideoStreamRtsp::getRunning()
+{
+    log_debug("Getting running state: %d", running);
+    return running;
+}
+
 GstElement* VideoStreamRtsp::getcrop()
 {
-    log_info("Returning crop's pointer");
+    log_debug("Returning crop's pointer");
     return mcrop;
+}
+
+GstElement* VideoStreamRtsp::getfsimage()
+{
+    log_debug("Returning fsimage's pointer");
+    return fsimage;
+}
+
+GstElement* VideoStreamRtsp::getfsvideo()
+{
+    log_debug("Returning fsvideo's pointer");
+    return fsvideo;
+}
+
+GstElement* VideoStreamRtsp::getencvideo()
+{
+    log_debug("Returning encvideo's pointer");
+    return encvideo;
+}
+
+GstElement* VideoStreamRtsp::getvimage()
+{
+    log_debug("Returning vimage's pointer");
+    return vimage;
+}
+
+GstElement* VideoStreamRtsp::getvvideo()
+{
+    log_debug("Returning vvideo's pointer");
+    return vvideo;
 }
 
 int VideoStreamRtsp::getCameraResolution(uint32_t &width, uint32_t &height)
@@ -407,8 +566,9 @@ std::string VideoStreamRtsp::getGstPipeline(std::map<std::string, std::string> &
     }
 
     name = source + " ! queue ! " + getGstVideoConvertor() + " ! videocrop name=crop ! videoscale ! " + getGstVideoConvertor() + " ! "
-        + getGstVideoConvertorCaps(params, mWidth, mHeight) + " ! " + getGstVideoEncoder(mEncFormat)
-        + " ! " + getGstRtspVideoSink();
+        + getGstVideoConvertorCaps(params, mWidth, mHeight) + " ! tee name=traw traw. ! " + getGstVideoEncoder(mEncFormat) + " ! h264parse ! "
+        + " tee name=tenc tenc. ! " + getGstRtspVideoSink() + " traw. ! queue  ! valve name=vvideo drop=true ! " + getGstVideoEncoder(mEncFormat) + " name=encvideo " + " ! h264parse ! " +
+        + " mpegtsmux ! tsparse ! multifilesink name=fsvideo location=/tmp/recording.ts async=false next-file=1 traw. ! queue ! valve name=vimage drop=true ! jpegenc ! queue ! multifilesink name=fsimage location=/tmp/img__%0004d.jpg async=false ";
 
     log_debug("%s:%s", __func__, name.c_str());
     return name;
@@ -508,17 +668,40 @@ static GstElement *cb_create_element(GstRTSPMediaFactory *factory, const GstRTSP
     }
 
     obj->setcrop(gst_bin_get_by_name (GST_BIN(pipeline), "crop"));
+    obj->setfsimage(gst_bin_get_by_name (GST_BIN(pipeline), "fsimage"));
+    obj->setfsvideo(gst_bin_get_by_name (GST_BIN(pipeline), "fsvideo"));
+    obj->setvimage(gst_bin_get_by_name (GST_BIN(pipeline), "vimage"));
+    obj->setvvideo(gst_bin_get_by_name (GST_BIN(pipeline), "vvideo"));
+    obj->setencvideo(gst_bin_get_by_name (GST_BIN(pipeline), "encvideo"));
 
     if (obj->getcrop() == NULL){
-        log_error("VIDEOCROP element not found!");
+        log_debug("VIDEOCROP element not found!");
     }
     else {
         obj->setZoom(obj->getCurrZoom());
     }
 
+    if (obj->getfsimage() == NULL){
+        log_debug("FSIMAGE not found!");
+    }
+    if (obj->getfsvideo() == NULL){
+        log_debug("FSVIDEO element not found!");
+    }
+    if (obj->getvimage() == NULL){
+        log_debug("VIMAGE element not found!");
+    }
+    if (obj->getvvideo() == NULL){
+        log_debug("VVIDEO element not found!");
+    }
+    if (obj->getencvideo() == NULL){
+        log_debug("ENCVIDEO element not found!");
+    }
+
     /* return if not appsrc pipeline, else configure */
-    if (launch.find("appsrc") == std::string::npos)
+    if (launch.find("appsrc") == std::string::npos){
+		obj->setRunning(true);
         return pipeline;
+    }
 
     /* configure the appsrc element*/
     GstElement *appsrc = gst_bin_get_by_name(GST_BIN(pipeline), "mysrc");
@@ -552,7 +735,9 @@ static GstElement *cb_create_element(GstRTSPMediaFactory *factory, const GstRTSP
 static void cb_unprepared(GstRTSPMedia *media, gpointer user_data)
 {
     log_debug("%s", __func__);
-
+    VideoStreamRtsp *obj = reinterpret_cast<VideoStreamRtsp *> (user_data);
+    log_info("Stopping video stream");
+    obj->setRunning(false);
     /* TODO:: Stop camera device capturing*/
 }
 
@@ -561,7 +746,7 @@ static void cb_media_configure(GstRTSPMediaFactory *factory, GstRTSPMedia *media
     log_debug("%s", __func__);
 
     /* TODO:: Start camera device capturing */
-
+    
     g_signal_connect(media, "unprepared", (GCallback)cb_unprepared,
                      g_object_get_data(G_OBJECT(factory), "user_data"));
 }

@@ -46,6 +46,7 @@ ImageCaptureGst::ImageCaptureGst(std::shared_ptr<CameraDevice> camDev)
 
     mCamDev->getSize(mCamWidth, mCamHeight);
     mCamDev->getPixelFormat(mCamPixFormat);
+    mURLLastCapture = "";
 }
 
 ImageCaptureGst::ImageCaptureGst(std::shared_ptr<CameraDevice> camDev,
@@ -326,6 +327,19 @@ std::string ImageCaptureGst::getImgExt(int format)
     }
 }
 
+std::string ImageCaptureGst::getURLLastCapture()
+{
+	return mURLLastCapture;
+}
+
+std::string ImageCaptureGst::getURLNextCapture()
+{
+    log_debug("Creating next url for snapshot from video stream");
+    std::string ext = getImgExt(mFormat);
+    mURLLastCapture = mPath + "img_" + std::to_string(++imgCount) + "." + ext;
+    return mURLLastCapture;
+}
+
 std::string ImageCaptureGst::getGstPipelineNameV4l2()
 {
     std::string device = mCamDev->getDeviceId();
@@ -352,7 +366,9 @@ std::string ImageCaptureGst::getGstPipelineNameV4l2()
     ss << "v4l2src device=" << device + " num-buffers=1"
        << " ! " << filter.str() << " ! " << enc << " ! "
        << "filesink location=" << mPath + "img_" << std::to_string(++imgCount) << "." + ext;
-    log_debug("Gstreamer pipeline: %s", ss.str().c_str());
+       
+    mURLLastCapture = mPath + "img_" + std::to_string(imgCount) + "." + ext;
+    log_info("Gstreamer capture pipeline: %s", ss.str().c_str());
     return ss.str();
 }
 

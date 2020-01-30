@@ -29,6 +29,8 @@ public:
     virtual int start() = 0;
     virtual int stop() = 0;
     virtual int getState() = 0;
+    virtual int setRunning(bool state) = 0;
+    virtual bool getRunning() = 0;
     virtual int setResolution(int imgWidth, int imgHeight) = 0;
     virtual int getResolution(int &imgWidth, int &imgHeight) = 0;
     virtual int setFormat(int vidFormat) = 0;
@@ -39,6 +41,9 @@ public:
     // The port to send the packets to
     virtual int setPort(uint32_t port) = 0;
     virtual int getPort() = 0;
+    virtual bool takeSnapshot(std::string url) = 0;
+    virtual bool startRecording(std::string url) = 0;
+    virtual bool stopRecording() = 0;
     virtual int setZoom(int zoom) = 0;
     virtual int getCurrZoom() = 0;
     virtual int setTextOverlay(std::string text, int timeSec) { return -1; };

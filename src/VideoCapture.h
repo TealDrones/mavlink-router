@@ -57,4 +57,5 @@ public:
     virtual int setFrameRate(int frameRate) = 0;
     virtual int setLocation(const std::string vidPath) = 0;
     virtual std::string getLocation() = 0;
+    virtual std::string getURLNextCapture() = 0;
 };

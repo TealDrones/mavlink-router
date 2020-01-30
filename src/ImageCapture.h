@@ -48,6 +48,8 @@ public:
     virtual int getState() = 0;
     virtual int setInterval(int interval) = 0;
     virtual int getInterval() = 0;
+    virtual std::string getURLLastCapture() = 0;
+    virtual std::string getURLNextCapture() = 0;
     virtual int setResolution(int imgWidth, int imgHeight) = 0;
     virtual int setFormat(CameraParameters::IMAGE_FILE_FORMAT imgFormat) = 0;
     virtual int setLocation(const std::string imgPath) = 0;

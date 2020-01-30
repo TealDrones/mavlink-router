@@ -223,6 +223,7 @@ public:
         VIDEO_FILE_WMV, /* Windows Media Video */
         VIDEO_FILE_FLV, /* Flash Video Format */
         VIDEO_FILE_MOV, /* Apple QuickTime Movie */
+        VIDEO_FILE_TS, /* Transport Stream */
         VIDEO_FILE_MAX = 99
     } VIDEO_FILE_FORMAT;
 

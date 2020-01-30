@@ -25,7 +25,7 @@
 #define DEFAULT_BITRATE 512
 #define DEFAULT_FRAMERATE 25
 #define DEFAULT_ENCODER CameraParameters::VIDEO_CODING_AVC
-#define DEFAULT_FILE_FORMAT CameraParameters::VIDEO_FILE_MP4
+#define DEFAULT_FILE_FORMAT CameraParameters::VIDEO_FILE_TS
 #define DEFAULT_FILE_PATH "/tmp/"
 #define V4L2_DEVICE_PREFIX "/dev/"
 
@@ -44,6 +44,7 @@ VideoCaptureGst::VideoCaptureGst(std::shared_ptr<CameraDevice> camDev)
     , mPipeline(nullptr)
 {
     log_info("%s Device:%s", __func__, mCamDev->getDeviceId().c_str());
+    mURLLastCapture = "";
 }
 
 VideoCaptureGst::VideoCaptureGst(std::shared_ptr<CameraDevice> camDev,
@@ -61,6 +62,7 @@ VideoCaptureGst::VideoCaptureGst(std::shared_ptr<CameraDevice> camDev,
 
 {
     log_info("%s Device:%s with settings", __func__, mCamDev->getDeviceId().c_str());
+    mURLLastCapture = "";
 }
 
 VideoCaptureGst::~VideoCaptureGst()
@@ -89,7 +91,7 @@ int VideoCaptureGst::uninit()
     log_info("%s::%s", typeid(this).name(), __func__);
 
     if (getState() != STATE_INIT && getState() != STATE_ERROR) {
-        log_error("Invalid State : %d", getState());
+        log_debug("Unexpected state : %d", getState());
         return -1;
     }
 
@@ -126,7 +128,7 @@ int VideoCaptureGst::stop()
     log_info("%s::%s", typeid(this).name(), __func__);
 
     if (getState() != STATE_RUN) {
-        log_error("Invalid State : %d", getState());
+        log_debug("Capture is not in RUN State : %d", getState());
         return -1;
     }
 
@@ -183,6 +185,14 @@ int VideoCaptureGst::setState(int state)
 int VideoCaptureGst::getState()
 {
     return mState;
+}
+
+std::string VideoCaptureGst::getURLNextCapture()
+{
+    log_debug("Creating next url for video capture from video stream");
+    std::string ext = getFileExt(mFileFmt);
+    mURLLastCapture = mFilePath + "vid_" + std::to_string(++vidCount) + "." + ext;
+    return mURLLastCapture;
 }
 
 int VideoCaptureGst::setResolution(int vidWidth, int vidHeight)
@@ -316,6 +326,9 @@ std::string VideoCaptureGst::getGstMuxerName(int fileFormat)
     case CameraParameters::VIDEO_FILE_MP4:
         ret = std::string("mp4mux");
         break;
+    case CameraParameters::VIDEO_FILE_TS:
+        ret = std::string("mpegtsmux");
+        break;
     default:
         ret = {};
         break;
@@ -331,6 +344,9 @@ std::string VideoCaptureGst::getFileExt(int fileFormat)
     switch (fileFormat) {
     case CameraParameters::VIDEO_FILE_MP4:
         ret = std::string("mp4");
+        break;
+    case CameraParameters::VIDEO_FILE_TS:
+        ret = std::string("ts");
         break;
     default:
         ret = {};
@@ -371,7 +387,9 @@ std::string VideoCaptureGst::getGstV4l2PipelineName()
     ss << "v4l2src device=" << device << " ! " << filter.str() << " ! " << encoder << sbr.str()
        << " ! " << parser << " ! " << muxer << " ! "
        << "filesink location=" << mFilePath + "vid_" << std::to_string(++vidCount) << "." + ext;
-
+    
+    mURLLastCapture = mFilePath + "vid_" + std::to_string(vidCount) + "." + ext;
+    
     return ss.str();
 }
 
