@@ -100,6 +100,7 @@ int Mainloop::mod_fd(int fd, void *data, int events)
 
 int Mainloop::add_fd(int fd, void *data, int events)
 {
+    log_info("add_fd %d",fd);
     struct epoll_event epev = { };
 
     epev.events = events;
@@ -745,7 +746,7 @@ void Mainloop::_handle_pipe()
     char* buffer = cmd;
     if (num_read > 0) {
         cmd[num_read] = 0;
-        log_debug("Pipe read %ld bytes: %s", num_read, cmd);
+        log_info("Pipe read %ld bytes: %s", num_read, cmd);
 
         // If more than one command separated by an end of
         // line was written in the pipe, separate each command
@@ -768,6 +769,7 @@ void Mainloop::_handle_pipe()
           }
 
           if (a.size() == 2 && a[0] == "remove") {
+              log_info("remove dynamic endpoint ---------------------- %s", a[1].c_str());
               _remove_dynamic_endpoint(a[1]);
               continue;
           }
@@ -796,6 +798,8 @@ void Mainloop::_handle_pipe()
               log_error("Could not open %s:%d", address.c_str(), port);
               continue;
           }
+          log_info("add dynamic endpoint ---------------------- %s command: %s", name.c_str(), command);
+
           _add_dynamic_endpoint(name, command, udp.release());
         }
     }
