@@ -35,6 +35,7 @@
 #include "endpoint.h"
 #include "mainloop.h"
 
+#define TEAL_VERSION "0.0.4"
 #define MAVLINK_TCP_PORT 5760
 #define DEFAULT_BAUDRATE 115200U
 #define DEFAULT_CONFFILE "/etc/mavlink-router/main.conf"
@@ -75,6 +76,7 @@ static const char* short_options = "he:rt:c:d:l:p:g:bvV";
 
 static void help(FILE *fp) {
     fprintf(fp,
+	    "Teal Version %s"
             "%s [OPTIONS...] [<uart>|<udp_address>]\n\n"
             "  <uart>                       UART device (<device>[:<baudrate>]) that will be routed\n"
             "  <udp_address>                UDP address (<ip>:<port>) that will be routed\n"
@@ -98,7 +100,7 @@ static void help(FILE *fp) {
             "  -v --verbose                 Verbose. Same as --debug-log-level=debug\n"
             "  -V --version                 Show version\n"
             "  -h --help                    Print this message\n"
-            , program_invocation_short_name);
+            , TEAL_VERSION, program_invocation_short_name);
 }
 
 static unsigned long find_next_endpoint_port(const char *ip)
@@ -909,6 +911,8 @@ int main(int argc, char *argv[])
 
     Log::set_max_level((Log::Level) opt.debug_log_level);
 
+    log_info("Teal Version: %s", TEAL_VERSION);
+    dbg("version", TEAL_VERSION);
     dbg("Cmd line and options parsed");
 
     if (opt.tcp_port == ULONG_MAX)
