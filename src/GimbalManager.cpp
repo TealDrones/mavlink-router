@@ -3,7 +3,7 @@
 #include "GimbalManager.h"
 
 GimbalManager::GimbalManager() {
-    cout << "Starting gimbal proxy";
+    //cout << "Starting gimbal proxy";
     mq_server->set_queue_name("/data/teal/mqueue/gimbal.msg");
     mq_server->start(true);
     mq_server->set_single_message_mode(true);
@@ -16,7 +16,7 @@ GimbalManager::~GimbalManager() {
 void GimbalManager::sendMessage(int msg) {
     char send = msg;
     if(!mq_server->write(& send)) {
-        cout << "Message_queue failed, client did not read the message";
+        //cout << "Message_queue failed, client did not read the message";
     }
 }
 
