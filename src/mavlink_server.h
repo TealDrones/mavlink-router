@@ -26,6 +26,7 @@
 #include "conf_file.h"
 #include "socket.h"
 #include "mqueue.h"
+#include "GimbalManager.h"
 
 typedef struct image_callback {
     int comp_id;             /* Component ID */
@@ -60,7 +61,8 @@ private:
     int zoom_level;
     std::map<int, CameraComponent *> compIdToObj;
     mqueue hal_server;
-    mqueue gimbal_server;
+    GimbalManager * gimbalManager;
+
     uint8_t video_status;
     int _tilt;
     hal3_commands hal3 = {};

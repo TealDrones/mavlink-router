@@ -109,9 +109,7 @@ MavlinkServer::MavlinkServer(const ConfFile &conf)
     hal_server.set_single_message_mode(true);
 
     log_debug("Creating gimbal message queue structure");
-    gimbal_server.set_queue_name("/data/teal/mqueue/gimbal.msg");
-    gimbal_server.start(true);
-    gimbal_server.set_single_message_mode(true);
+    gimbalManager = new GimbalManager();
 
     log_debug("Starting message queue");
 
@@ -717,7 +715,7 @@ void MavlinkServer::_handle_camera_zoom(const struct sockaddr_in &addr, mavlink_
     bool success = false;
 
     CameraComponent *tgtComp = getCameraComponent(cmd.target_component);
-    if (tgtComp) {
+    if (tgtComp && cmd.param1 == 1) {
         success = true;
 
         if (cmd.target_component == IMX412_COMP_ID) {
@@ -741,7 +739,13 @@ void MavlinkServer::_handle_camera_zoom(const struct sockaddr_in &addr, mavlink_
             log_info("Selected camera BOSON");
         }
     }
-
+    if (cmd.param1 == 0) {
+        if (cmd.param2 < 0) {
+            gimbalManager->panDown();
+        } else if (cmd.param2 > 0) {
+            gimbalManager->panUp();
+        }
+    }
     _send_ack(addr, cmd.command, cmd.target_component, success);
 }
 
