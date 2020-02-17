@@ -344,7 +344,7 @@ void MavlinkServer::_handle_image_start_capture(const struct sockaddr_in &addr,
 
             if(!hal_server.write(hal3.snapshot)) {
                 log_error ("Message_queue failed, client did not read the message");
-                success = false;				
+                success = false;
             }
         }
         else {
@@ -737,6 +737,13 @@ void MavlinkServer::_handle_camera_zoom(const struct sockaddr_in &addr, mavlink_
         }
         else {
             log_info("Selected camera BOSON");
+        }
+    }
+    if (cmd.param1 == 0) {
+        if (cmd.param2 < 0) {
+            gimbalManager->panDown();
+        } else if (cmd.param2 > 0) {
+            gimbalManager->panUp();
         }
     }
     if (cmd.param1 == 0) {
