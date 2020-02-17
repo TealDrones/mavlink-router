@@ -24,14 +24,10 @@ void GimbalManager::sendMessage(int msg) {
 
 void GimbalManager::panUp() {
     printf("GimbaManager: pan UP\n");
-    for (int i = 0; i < 5; i++){
-        sendMessage('P');
-    }
+    sendMessage('P');
 }
 
 void GimbalManager::panDown() {
     printf("GimbaManager: pan DOWN\n");
-    for (int i = 0; i < 5; i++){
-        sendMessage('p');
-    }
+    sendMessage('p');
 }
