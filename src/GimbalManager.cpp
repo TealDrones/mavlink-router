@@ -4,6 +4,7 @@
 
 GimbalManager::GimbalManager() {
     //cout << "Starting gimbal proxy";
+    mq_server = new mqueue();
     mq_server->set_queue_name("/data/teal/mqueue/gimbal.msg");
     mq_server->start(true);
     mq_server->set_single_message_mode(true);
