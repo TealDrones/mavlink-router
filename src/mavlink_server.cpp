@@ -746,13 +746,6 @@ void MavlinkServer::_handle_camera_zoom(const struct sockaddr_in &addr, mavlink_
             gimbalManager->panUp();
         }
     }
-    if (cmd.param1 == 0) {
-        if (cmd.param2 < 0) {
-            gimbalManager->panDown();
-        } else if (cmd.param2 > 0) {
-            gimbalManager->panUp();
-        }
-    }
     _send_ack(addr, cmd.command, cmd.target_component, success);
 }
 
