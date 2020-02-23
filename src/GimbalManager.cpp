@@ -1,4 +1,3 @@
-#include "GimbalManager.h"
 
 GimbalManager::GimbalManager() {
     //cout << "Starting gimbal proxy";

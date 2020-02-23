@@ -152,11 +152,11 @@ void CameraComponent::initStorageInfo(struct StorageInfo &storeInfo)
     storeInfo.storage_id = 1;
     storeInfo.storage_count = 1;
     storeInfo.status = 2; /*formatted*/
-    storeInfo.total_capacity = 50.0;
-    storeInfo.used_capacity = 0.0;
-    storeInfo.available_capacity = 50.0;
-    storeInfo.read_speed = 128;
-    storeInfo.write_speed = 128;
+    storeInfo.total_capacity = 80000.0;
+    storeInfo.used_capacity = 40000.0;
+    storeInfo.available_capacity = 400000.0;
+    storeInfo.read_speed = 3000;
+    storeInfo.write_speed = 30000;
 }
 
 int CameraComponent::getParamType(const char *param_id, size_t id_size)
