@@ -1,5 +1,3 @@
-#pragma once
-
 #include "GimbalManager.h"
 
 GimbalManager::GimbalManager() {
@@ -17,7 +15,6 @@ GimbalManager::~GimbalManager() {
 void GimbalManager::sendMessage(int msg) {
     char send = msg;
     if(!mq_server->write(& send)) {
-        printf("Message_queue failed, client did not read the message\n");
         //cout << "Message_queue failed, client did not read the message";
     }
 }

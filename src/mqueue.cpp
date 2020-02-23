@@ -18,16 +18,21 @@ void mqueue::set_single_message_mode (bool mode)
 {
 	single_message_mode = mode;
 	if (mode) {
-		printf("MQueue: Single message mode enabled \n");
+		printf("MQueue: Single message mode enabled %s\n",queue_file.c_str());
 	} else {
-		printf("MQueue: Multiple message mode \n");
+		printf("MQueue: Multiple message mode %s \n",queue_file.c_str());
 	}
 }
 
 /* Starting mqueue instance */
+/**
+ * 
+ * param server_mode - true is sender, false = receiver
+ * 
+ */
 int mqueue::start (bool server_mode)
 {
-	printf("MQueue: Start \n");
+	printf("MQueue: Start %s\n",queue_file.c_str());
 	key_t key;
 
 	/* Message queue's key */
