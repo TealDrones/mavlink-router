@@ -226,7 +226,7 @@ void MavlinkServer::_handle_request_video_stream_information(const struct sockad
 		            + tgtComp->getVideoStream()->getAddress();
 
         mavlink_msg_video_stream_information_pack(
-        _system_id, cmd.target_component, &msg, cmd.target_component - 100, 2, 
+        _system_id, cmd.target_component, &msg, cmd.target_component - 100, 1, 
         VIDEO_STREAM_TYPE_RTSP, flags, 30,
         stream_w, stream_h, 4000, 0, 120, stream_name.c_str(), rtsp_path.c_str());
 
