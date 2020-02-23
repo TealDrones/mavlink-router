@@ -5,14 +5,13 @@
         <vendor>Boson</vendor>
     </definition>
     <parameters>
-        <parameter name="camera-mode" type="uint32" default="1" control="0">
+        <parameter name="CAM_MODE" type="uint32" default="1" control="0">
             <description>Camera Mode</description>
             <options>
-                <option name="still" value="0" />
-                <exclusions>
-                    <exclude>video-size</exclude>
-                </exclusions>
-                <option name="video" value="1" />
+                <option name="Photo" value="0">
+                </option>
+                <option name="Video" value="1">
+                </option>
             </options>
         </parameter>
     </parameters>

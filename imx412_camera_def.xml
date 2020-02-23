@@ -5,66 +5,15 @@
         <vendor>vi-output, imx390 30-001b</vendor>
     </definition>
     <parameters>
-        <parameter name="camera-mode" type="uint32" default="1" control="0">
+        <parameter name="CAM_MODE" type="uint32" default="1" control="0">
             <description>Camera Mode</description>
             <options>
-                <option name="still" value="0" />
+                <option name="Photo" value="1" />
+                <option name="Video" value="1" />
                 <exclusions>
                     <exclude>video-size</exclude>
                 </exclusions>
-                <option name="video" value="1" />
             </options>
-        </parameter>
-        <parameter name="Group Hold" type="int32" default="0" min="0" max="1" step="1">
-            <description>Group Hold</description>
-        </parameter>
-        <parameter name="HDR enable" type="int32" default="0" min="0" max="1" step="1">
-            <description>HDR enable</description>
-        </parameter>
-        <parameter name="Gain" type="int32" default="0" min="0" max="300" step="3">
-            <description>Gain</description>
-        </parameter>
-        <parameter name="Exposure" type="int32" default="33333" min="59" max="33333" step="1">
-            <description>Exposure</description>
-        </parameter>
-        <parameter name="Frame Rate" type="int32" default="30000000" min="30000000" max="30000000" step="1">
-            <description>Frame Rate</description>
-        </parameter>
-        <parameter name="Exposure Short" type="int32" default="33333" min="59" max="33333" step="1">
-            <description>Exposure Short</description>
-        </parameter>
-        <parameter name="Bypass Mode" type="int32" default="0" min="0" max="1" step="1">
-            <description>Bypass Mode</description>
-        </parameter>
-        <parameter name="Override Enable" type="int32" default="0" min="0" max="1" step="1">
-            <description>Override Enable</description>
-        </parameter>
-        <parameter name="Height Align" type="int32" default="1" min="1" max="16" step="1">
-            <description>Height Align</description>
-        </parameter>
-        <parameter name="Size Align" type="int32" default="0" min="0" max="2" step="1">
-            <description>Size Align</description>
-        </parameter>
-        <parameter name="Write ISP format" type="int32" default="1" min="1" max="1" step="1">
-            <description>Write ISP format</description>
-        </parameter>
-        <parameter name="Sensor Signal Properties" type="int32" default="0" min="0" max="4294967295" step="1">
-            <description>Sensor Signal Properties</description>
-        </parameter>
-        <parameter name="Sensor Image Properties" type="int32" default="0" min="0" max="4294967295" step="1">
-            <description>Sensor Image Properties</description>
-        </parameter>
-        <parameter name="Sensor Control Properties" type="int32" default="0" min="0" max="4294967295" step="1">
-            <description>Sensor Control Properties</description>
-        </parameter>
-        <parameter name="Sensor DV Timings" type="int32" default="0" min="0" max="4294967295" step="1">
-            <description>Sensor DV Timings</description>
-        </parameter>
-        <parameter name="Low Latency Mode" type="int32" default="0" min="0" max="1" step="1">
-            <description>Low Latency Mode</description>
-        </parameter>
-        <parameter name="Sensor Modes" type="int32" default="30" min="0" max="30" step="1">
-            <description>Sensor Modes</description>
         </parameter>
     </parameters>
 </mavlinkcamera>
