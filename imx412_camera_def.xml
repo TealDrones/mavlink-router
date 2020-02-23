@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <mavlinkcamera>
     <definition version="1">
-        <model>vi-output, imx390 30-001b</model>
-        <vendor>vi-output, imx390 30-001b</vendor>
+        <model>Visible Camera</model>
+        <vendor>Visible Camera</vendor>
     </definition>
     <parameters>
         <parameter name="CAM_MODE" type="uint32" default="1" control="0">
