@@ -57,7 +57,8 @@ CameraDevice::Status CameraDeviceV4l2::getInfo(struct CameraInfo &camInfo) const
     camInfo.resolution_h = 0;
     camInfo.resolution_v = 0;
     camInfo.lens_id = 0;
-    camInfo.flags = ~0u; // TODO :: Replace with flags
+    camInfo.flags = CAMERA_CAP_FLAGS_HAS_VIDEO_STREAM | CAMERA_CAP_FLAGS_CAPTURE_VIDEO | CAMERA_CAP_FLAGS_CAPTURE_IMAGE;
+
     camInfo.cam_definition_version = 1;
     if (!mCamDefURI.empty()) {
         if (sizeof(camInfo.cam_definition_uri) > mCamDefURI.size()) {
@@ -185,6 +186,8 @@ int CameraDeviceV4l2::initInfo()
 
     log_info("card = %s driver = %s", mCardName.c_str(), mDriverName.c_str());
     log_debug("Kernel version = %d", mVersion);
+
+    v4l2_query_framesizes(camFd);
 
     v4l2_close(camFd);
 
@@ -370,7 +373,7 @@ std::string CameraDeviceV4l2::getParamName(int cid)
         break;
 
     default:
-        log_error("Unknown V4L2 Control Parameter ");
+        log_error("getParamName - Unknown V4L2 Control Parameter ");
         break;
     }
 
@@ -442,7 +445,7 @@ int CameraDeviceV4l2::getParamId(int cid)
         break;
 
     default:
-        log_error("Unknown V4L2 Control Parameter ");
+        log_error("getParamId - Unknown V4L2 Control Parameter ");
         break;
     }
 

@@ -18,7 +18,7 @@
 #pragma once
 #include <linux/videodev2.h>
 #include <string>
-
+#include <mavlink.h>
 #include "CameraDevice.h"
 #include "CameraParameters.h"
 

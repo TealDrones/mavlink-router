@@ -156,26 +156,24 @@ int v4l2_query_framesizes(int fd)
     fmt.index = 0;
     while (v4l2_ioctl(fd, VIDIOC_ENUM_FMT, &fmt) != -1) {
         // TODO:: Save the format in some DS
-        log_debug("Pixel Format: %u", fmt.pixelformat);
-        log_debug("Name : %s\n", fmt.description);
+        log_info("Pixel Format: %u", fmt.pixelformat);
+        log_info("Name : %s\n", fmt.description);
         frame_size.index = 0;
         frame_size.pixel_format = fmt.pixelformat;
-        while (v4l2_ioctl(fd, VIDIOC_ENUM_FRAMESIZES, &frame_size) != -1) {
-            switch (frame_size.type) {
-            case V4L2_FRMSIZE_TYPE_DISCRETE:
-                log_debug(" FrameSize: %ux%u\n", frame_size.discrete.width,
-                          frame_size.discrete.height);
-                break;
-            case V4L2_FRMSIZE_TYPE_CONTINUOUS:
-            case V4L2_FRMSIZE_TYPE_STEPWISE:
-                log_debug(" FrameSize: %ux%u -> %ux%u\n", frame_size.stepwise.min_width,
-                          frame_size.stepwise.min_height, frame_size.stepwise.max_width,
-                          frame_size.stepwise.max_height);
-                break;
-            }
-            // TODO::Save the framesizes against format in some DS
+        v4l2_ioctl(fd, VIDIOC_ENUM_FRAMESIZES, &frame_size);
+        switch (frame_size.type) {
+        case V4L2_FRMSIZE_TYPE_DISCRETE:
+            log_info(" FrameSize: %ux%u\n", frame_size.discrete.width,
+                        frame_size.discrete.height);
+            break;
+        case V4L2_FRMSIZE_TYPE_CONTINUOUS:
+        case V4L2_FRMSIZE_TYPE_STEPWISE:
+            log_info(" FrameSize: %ux%u -> %ux%u\n", frame_size.stepwise.min_width,
+                        frame_size.stepwise.min_height, frame_size.stepwise.max_width,
+                        frame_size.stepwise.max_height);
+            break;
         }
-
+        // TODO::Save the framesizes against format in some DS
         fmt.index++;
     }
 
