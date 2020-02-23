@@ -43,29 +43,7 @@ CameraComponent::~CameraComponent()
 {
     log_debug("%s::%s", __func__, mCamDev->getDeviceId().c_str());
 
-    if (mVidCap) {
-        mVidCap->stop();
-        mVidCap->uninit();
-        mVidCap.reset();
-    }
-
-    if (mImgCap) {
-        mImgCap->stop();
-        mImgCap->uninit();
-        mImgCap.reset();
-    }
-
-    if (mVidStream) {
-        mVidStream->stop();
-        mVidStream->uninit();
-        mVidStream.reset();
-    }
-
-    // stop the camera device
-    mCamDev->stop();
-
-    // Uninit the camera device
-    mCamDev->uninit();
+    stop();
 
     mCamDev.reset();
 }
@@ -136,27 +114,17 @@ std::shared_ptr<VideoStream> CameraComponent::getVideoStream()
 	return mVidStream;
 }
 
-std::shared_ptr<ImageCapture> CameraComponent::getImageCapture()
-{
-	return mImgCap;
-}
-
-std::shared_ptr<VideoCapture> CameraComponent::getVideoCapture()
-{
-	return mVidCap;
-}
-
 void CameraComponent::initStorageInfo(struct StorageInfo &storeInfo)
 {
     // TODO:: Fill storage details with real values
     storeInfo.storage_id = 1;
     storeInfo.storage_count = 1;
-    storeInfo.status = 2; /*formatted*/
-    storeInfo.total_capacity = 50.0;
-    storeInfo.used_capacity = 0.0;
-    storeInfo.available_capacity = 50.0;
-    storeInfo.read_speed = 128;
-    storeInfo.write_speed = 128;
+    storeInfo.status = STORAGE_STATUS_READY; /* ready */
+    storeInfo.total_capacity = 16000.0;
+    storeInfo.used_capacity = 8000.0;
+    storeInfo.available_capacity = 8000.0;
+    storeInfo.read_speed  = 30000;
+    storeInfo.write_speed = 30000;
 }
 
 int CameraComponent::getParamType(const char *param_id, size_t id_size)
@@ -340,40 +308,26 @@ int CameraComponent::startVideoCapture(int status_freq)
     log_info("CAMERA_CAPTURE_STATUS frequency %1d", status_freq);
     int ret = 0;
 
-    if (mVidCap){
-       log_info("Video capture instance enabled");
-    }
-    else{
-        log_info("Creating new video capture pointer using settings");
-        mVidCap = std::make_shared<VideoCaptureGst>(mCamDev, *mVidSetting); //added GF
-    }
+    if (mVidCap)
+        mVidCap.reset();
 
     // TODO :: Check if video capture or video streaming is running
 
     // check if settings are available
-    //~ if (mVidSetting){
-		//~ log_info("Creating new video capture pointer using settings");
-        //~ mVidCap = std::make_shared<VideoCaptureGst>(mCamDev, *mVidSetting);
-    //~ }
-    //~ else{
-		//~ log_info("Creating new video capture pointer with only device information");
-        //~ mVidCap = std::make_shared<VideoCaptureGst>(mCamDev);
-    //~ }
+    if (mVidSetting)
+        mVidCap = std::make_shared<VideoCaptureGst>(mCamDev, *mVidSetting);
+    else
+        mVidCap = std::make_shared<VideoCaptureGst>(mCamDev);
 
     if (!mVidPath.empty())
         mVidCap->setLocation(mVidPath);
 
-    mVidCap->stop();
-    mVidCap->uninit();
-
     ret = mVidCap->init();
-    log_info("init video capture");
-
     if (!ret) {
         ret = mVidCap->start();
         if (ret) {
             mVidCap->uninit();
-            log_info("Reseting video capture, fail to set states");
+            mVidCap.reset();
         }
     }
 
@@ -389,6 +343,7 @@ int CameraComponent::stopVideoCapture()
 
     mVidCap->stop();
     mVidCap->uninit();
+    mVidCap.reset();
 
     return ret;
 }
@@ -454,31 +409,6 @@ int CameraComponent::startVideoStream(const bool isUdp)
             mVidStream.reset();
         }
     }
-
-    /* Initializing Image capture submodule on component */
-    if (mImgCap)
-        mImgCap.reset();
-
-    // check if settings are available
-    if (mImgSetting)
-        mImgCap = std::make_shared<ImageCaptureGst>(mCamDev, *mImgSetting);
-    else
-        mImgCap = std::make_shared<ImageCaptureGst>(mCamDev);
-
-    if (!mImgPath.empty())
-        mImgCap->setLocation(mImgPath);
-
-    mImgCap->init();
-
-    /*Initializing video capture submodule on component*/
-    
-    if (!mVidCap)
-        mVidCap = std::make_shared<VideoCaptureGst>(mCamDev, *mVidSetting);
-
-    if (!mVidPath.empty())
-        mVidCap->setLocation(mVidPath);
-
-    mVidCap->init();
 
     return ret;
 }
