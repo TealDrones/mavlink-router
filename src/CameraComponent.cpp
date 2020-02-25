@@ -257,7 +257,7 @@ void CameraComponent::getImageCaptureStatus(uint8_t &status, int &interval)
         break;
     }
 
-    log_debug("%s Status:%d Interval:%d", __func__, status, interval);
+    log_info("%s Status:%d Interval:%d", __func__, status, interval);
     return;
 }
 
@@ -413,7 +413,7 @@ uint8_t CameraComponent::getVideoCaptureStatus()
         break;
     }
 
-    log_debug("%s Status:%d", __func__, ret);
+    log_info("%s Status:%d", __func__, ret);
     return ret;
 }
 

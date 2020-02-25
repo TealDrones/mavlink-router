@@ -111,7 +111,7 @@ MavlinkServer::MavlinkServer(const ConfFile &conf)
     log_debug("Creating gimbal message queue structure");
     gimbalManager = new GimbalManager();
 
-    log_debug("Starting message queue");
+    log_info("Sending hal 3 init: %s", hal3.init);
 
     if(!hal_server.write(hal3.init)) {
         log_error ("Message_queue failed, client did not read the message");
@@ -339,7 +339,7 @@ void MavlinkServer::_handle_image_start_capture(const struct sockaddr_in &addr,
         cb_data.addr = addr;
 
         if (cmd.target_component == IMX412_COMP_ID) {
-            log_info("Selected snapshot from camera IMX412");
+            log_info("Selected snapshot from camera IMX412: %s",hal3.snapshot);
             success = true;
 
             if(!hal_server.write(hal3.snapshot)) {
@@ -435,7 +435,7 @@ void MavlinkServer::_handle_video_start_capture(const struct sockaddr_in &addr,
         memcpy(&cb_data.addr, &addr, sizeof(struct sockaddr_in));
 
         if (cmd.target_component == IMX412_COMP_ID) {
-            log_info("Selected video start from camera IMX412");
+            log_info("Selected video start from camera IMX412: %s",hal3.start_recording);
             success = true;
 
             if(!hal_server.write(hal3.start_recording)) {
@@ -519,7 +519,7 @@ void MavlinkServer::_handle_video_stop_capture(const struct sockaddr_in &addr,
     if (tgtComp) {
 
         if (cmd.target_component == IMX412_COMP_ID) {
-            log_info("Selected video stop from camera IMX412");
+            log_info("Selected video stop from camera IMX412: %s", hal3.stop_recording);
             success = true;
 
             if(!hal_server.write(hal3.stop_recording)) {
@@ -891,14 +891,15 @@ bool MavlinkServer::_send_camera_capture_status(int compid, const struct sockadd
     log_debug("%s", __func__);
 
     bool success = false;
-    mavlink_message_t msg;
-    uint32_t time_boot_ms = 0;
-    uint8_t image_status = 0;
-    int image_interval = 0;
-    uint32_t recording_time_ms = 0;
-    int available_capacity = 50; // in MiB
     CameraComponent *tgtComp = getCameraComponent(compid);
+
     if (tgtComp) {
+        mavlink_message_t msg;
+        uint32_t time_boot_ms = 0;
+        uint8_t image_status = 0;
+        int image_interval = 0;
+        uint32_t recording_time_ms = 0;
+        int available_capacity = 5000; // in MiB
         // Get image capture status
         tgtComp->getImageCaptureStatus(image_status, image_interval);
         // Get video capture status
