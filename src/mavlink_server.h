@@ -94,6 +94,7 @@ private:
     void _handle_camera_zoom(const struct sockaddr_in &addr, mavlink_command_long_t &cmd);
     void _handle_gimbal_movement(const struct sockaddr_in &addr, mavlink_command_long_t &cmd);
     void _handle_heartbeat(const struct sockaddr_in &addr, mavlink_message_t *msg);
+    void _handle_arm_disarm(const sockaddr_in&, mavlink_command_long_t&);
     bool _send_camera_capture_status(int compid, const struct sockaddr_in &addr);
     bool _send_mavlink_message(const struct sockaddr_in *addr, mavlink_message_t &msg);
     void _send_ack(const struct sockaddr_in &addr, int cmd, int comp_id, bool success);

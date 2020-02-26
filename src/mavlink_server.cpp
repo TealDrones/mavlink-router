@@ -716,8 +716,8 @@ void MavlinkServer::_handle_arm_disarm(const struct sockaddr_in &addr, mavlink_c
 
 void MavlinkServer::_handle_gimbal_movement(const struct sockaddr_in &addr, mavlink_command_long_t &cmd) {
 
-        mavlink_dcm_to_euler(server->_system_id, it->first, &msg, MAV_TYPE_GENERIC,
-                                   MAV_AUTOPILOT_INVALID, MAV_MODE_PREFLIGHT, 0, MAV_STATE_ACTIVE);
+        // mavlink_dcm_to_euler(server->_system_id, it->first, &msg, MAV_TYPE_GENERIC,
+        //                            MAV_AUTOPILOT_INVALID, MAV_MODE_PREFLIGHT, 0, MAV_STATE_ACTIVE);
 
 }
 

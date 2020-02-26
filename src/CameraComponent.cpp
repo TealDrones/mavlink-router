@@ -151,7 +151,7 @@ void CameraComponent::initStorageInfo(struct StorageInfo &storeInfo)
     // TODO:: Fill storage details with real values
     storeInfo.storage_id = 1;
     storeInfo.storage_count = 1;
-    storeInfo.status = 2; /*formatted*/
+    storeInfo.status = 2; /*r eady */
     storeInfo.total_capacity = 80000.0;
     storeInfo.used_capacity = 40000.0;
     storeInfo.available_capacity = 400000.0;
