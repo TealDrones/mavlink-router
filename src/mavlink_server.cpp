@@ -49,6 +49,7 @@ MavlinkServer::MavlinkServer(const ConfFile &conf)
     , _is_sys_id_found(false)
     , _system_id(DEFAULT_SYSTEM_ID)
     , _comp_id(MAV_COMP_ID_CAMERA)
+	, _tilt(0)
 {
     struct options {
         unsigned long int port;
@@ -709,6 +710,19 @@ void MavlinkServer::_handle_reset_camera_settings(const struct sockaddr_in &addr
     _send_ack(addr, cmd.command, cmd.target_component, success);
 }
 
+void MavlinkServer::_handle_arm_disarm(const struct sockaddr_in &addr, mavlink_command_long_t &cmd) {
+
+}
+
+void MavlinkServer::_handle_gimbal_movement(const struct sockaddr_in &addr, mavlink_command_long_t &cmd) {
+
+        mavlink_dcm_to_euler(server->_system_id, it->first, &msg, MAV_TYPE_GENERIC,
+                                   MAV_AUTOPILOT_INVALID, MAV_MODE_PREFLIGHT, 0, MAV_STATE_ACTIVE);
+
+}
+
+
+
 void MavlinkServer::_handle_camera_zoom(const struct sockaddr_in &addr, mavlink_command_long_t &cmd)
 {
     log_info("ZOOM - %s - CompID: %d - values: %f, %f", __func__, cmd.target_component, cmd.param1, cmd.param2);
@@ -829,9 +843,11 @@ void MavlinkServer::_handle_mavlink_message(const struct sockaddr_in &addr, mavl
         case MAV_CMD_VIDEO_START_STREAMING:
             log_info("------------------ Teal received: (sysid: %d compid: %d msgid: %d)", msg->sysid, msg->compid,
             msg->msgid);
+            break;
         case MAV_CMD_VIDEO_STOP_STREAMING:
             log_info("------------------ Teal received: (sysid: %d compid: %d msgid: %d)", msg->sysid, msg->compid,
             msg->msgid);
+            break;
         case MAV_CMD_SET_CAMERA_ZOOM:
             log_info("Handle Zoom: %d .", cmd.command);
             this->_handle_camera_zoom(addr, cmd);
@@ -843,9 +859,14 @@ void MavlinkServer::_handle_mavlink_message(const struct sockaddr_in &addr, mavl
         case MAV_CMD_SET_CAMERA_FOCUS:
             log_info("TODO SETUP %d unhandled. Discarding.", cmd.command);
             break;
-
+        case MAV_CMD_COMPONENT_ARM_DISARM:
+            this->_handle_arm_disarm(addr, cmd);
+            log_info("----------ARM/DISARM   **********++++++++++=========----------");
+            break;
         case MAV_CMD_DO_MOUNT_CONFIGURE:
         case MAV_CMD_DO_MOUNT_CONTROL:
+        case MAV_CMD_DO_MOUNT_CONTROL_QUAT:
+            this->_handle_gimbal_movement(addr, cmd);
             log_info("----------MAV_CMD_DO_MOUNT_STUFF   **********++++++++++=========----------");
             break;
         default:
