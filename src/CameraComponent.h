@@ -22,6 +22,7 @@
 #include <vector>
 #include <functional>
 
+#include "StorageInfo.h"
 #include "CameraDevice.h"
 #include "CameraParameters.h"
 #include "ImageCapture.h"
@@ -29,16 +30,6 @@
 #include "VideoStream.h"
 #include "log.h"
 
-struct StorageInfo {
-    uint8_t storage_id;
-    uint8_t storage_count;
-    uint8_t status;
-    float total_capacity;
-    float used_capacity;
-    float available_capacity;
-    float read_speed;
-    float write_speed;
-};
 
 class CameraDevice;
 

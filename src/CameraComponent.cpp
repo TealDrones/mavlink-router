@@ -43,29 +43,7 @@ CameraComponent::~CameraComponent()
 {
     log_debug("%s::%s", __func__, mCamDev->getDeviceId().c_str());
 
-    if (mVidCap) {
-        mVidCap->stop();
-        mVidCap->uninit();
-        mVidCap.reset();
-    }
-
-    if (mImgCap) {
-        mImgCap->stop();
-        mImgCap->uninit();
-        mImgCap.reset();
-    }
-
-    if (mVidStream) {
-        mVidStream->stop();
-        mVidStream->uninit();
-        mVidStream.reset();
-    }
-
-    // stop the camera device
-    mCamDev->stop();
-
-    // Uninit the camera device
-    mCamDev->uninit();
+    stop();
 
     mCamDev.reset();
 }
@@ -133,17 +111,17 @@ const std::map<std::string, std::string> &CameraComponent::getParamList() const
 
 std::shared_ptr<VideoStream> CameraComponent::getVideoStream()
 {
-	return mVidStream;
+    return mVidStream;
 }
 
 std::shared_ptr<ImageCapture> CameraComponent::getImageCapture()
 {
-	return mImgCap;
+    return mImgCap;
 }
 
 std::shared_ptr<VideoCapture> CameraComponent::getVideoCapture()
 {
-	return mVidCap;
+    return mVidCap;
 }
 
 void CameraComponent::initStorageInfo(struct StorageInfo &storeInfo)
@@ -152,9 +130,9 @@ void CameraComponent::initStorageInfo(struct StorageInfo &storeInfo)
     storeInfo.storage_id = 1;
     storeInfo.storage_count = 1;
     storeInfo.status = 2; /*r eady */
-    storeInfo.total_capacity = 80000.0;
-    storeInfo.used_capacity = 40000.0;
-    storeInfo.available_capacity = 400000.0;
+    storeInfo.capacity = 80000.0;
+    storeInfo.available = 40000.0;
+    storeInfo.free = 400000.0;
     storeInfo.read_speed = 3000;
     storeInfo.write_speed = 30000;
 }
@@ -340,24 +318,23 @@ int CameraComponent::startVideoCapture(int status_freq)
     log_info("CAMERA_CAPTURE_STATUS frequency %1d", status_freq);
     int ret = 0;
 
-    if (mVidCap){
-       log_info("Video capture instance enabled");
-    }
-    else{
+    if (mVidCap) {
+        log_info("Video capture instance enabled");
+    } else {
         log_info("Creating new video capture pointer using settings");
-        mVidCap = std::make_shared<VideoCaptureGst>(mCamDev, *mVidSetting); //added GF
+        mVidCap = std::make_shared<VideoCaptureGst>(mCamDev, *mVidSetting); // added GF
     }
 
     // TODO :: Check if video capture or video streaming is running
 
     // check if settings are available
     //~ if (mVidSetting){
-		//~ log_info("Creating new video capture pointer using settings");
-        //~ mVidCap = std::make_shared<VideoCaptureGst>(mCamDev, *mVidSetting);
+    //~ log_info("Creating new video capture pointer using settings");
+    //~ mVidCap = std::make_shared<VideoCaptureGst>(mCamDev, *mVidSetting);
     //~ }
     //~ else{
-		//~ log_info("Creating new video capture pointer with only device information");
-        //~ mVidCap = std::make_shared<VideoCaptureGst>(mCamDev);
+    //~ log_info("Creating new video capture pointer with only device information");
+    //~ mVidCap = std::make_shared<VideoCaptureGst>(mCamDev);
     //~ }
 
     if (!mVidPath.empty())
@@ -471,7 +448,7 @@ int CameraComponent::startVideoStream(const bool isUdp)
     mImgCap->init();
 
     /*Initializing video capture submodule on component*/
-    
+
     if (!mVidCap)
         mVidCap = std::make_shared<VideoCaptureGst>(mCamDev, *mVidSetting);
 

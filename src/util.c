@@ -178,3 +178,17 @@ size_t mem_cpy(void *dest, size_t dsize, const void *src, size_t ssize, size_t c
 
     return ncopy;
 }
+
+double get_uptime()
+{
+    std::chrono::milliseconds uptime(0u);
+    double uptime_seconds;
+    if (std::ifstream("/proc/uptime", std::ios::in) >> uptime_seconds)
+    {
+    uptime = std::chrono::milliseconds(
+        static_cast<unsigned long long>(uptime_seconds*1000.0)
+    );
+    }
+    return uptime_seconds;
+}
+

@@ -292,11 +292,11 @@ void MavlinkServer::_handle_request_storage_information(const struct sockaddr_in
     CameraComponent *tgtComp = getCameraComponent(cmd.target_component);
     if (tgtComp) {
         // TODO:: Fill with appropriate value
-        const StorageInfo &storeInfo = tgtComp->getStorageInfo();
+        const StorageInfo storeInfo = tgtComp->getStorageInfo();
         mavlink_msg_storage_information_pack(_system_id, cmd.target_component, &msg, 0,
                                              storeInfo.storage_id, storeInfo.storage_count,
-                                             storeInfo.status, storeInfo.total_capacity,
-                                             storeInfo.used_capacity, storeInfo.available_capacity,
+                                             storeInfo.status, storeInfo.capacity,
+                                             storeInfo.used, storeInfo.available,
                                              storeInfo.read_speed, storeInfo.write_speed);
 
         if (!_send_mavlink_message(&addr, msg)) {
@@ -915,23 +915,26 @@ bool MavlinkServer::_send_camera_capture_status(int compid, const struct sockadd
     CameraComponent *tgtComp = getCameraComponent(compid);
 
     if (tgtComp) {
+        const StorageInfo &storeInfo = tgtComp->getStorageInfo();
         mavlink_message_t msg;
         uint32_t time_boot_ms = 0;
         uint8_t image_status = 0;
         int image_interval = 0;
         uint32_t recording_time_ms = 0;
-        int available_capacity = 5000; // in MiB
+        int available_capacity = storeInfo.available; // in MiB
         // Get image capture status
         tgtComp->getImageCaptureStatus(image_status, image_interval);
         // Get video capture status
         video_status = tgtComp->getVideoCaptureStatus();
+        log_info("%s Video Status %d", __func__, video_status);
+
         mavlink_msg_camera_capture_status_pack(_system_id, compid, &msg, time_boot_ms, image_status,
                                                video_status, static_cast<float>(image_interval),
                                                recording_time_ms,
                                                static_cast<float>(available_capacity));
         success = _send_mavlink_message(&addr, msg);
         if (!success) {
-            log_info("Sending camera setting failed for camera %d.", compid);
+            log_warning("Sending camera setting failed for camera %d.", compid);
         }
 
     }
