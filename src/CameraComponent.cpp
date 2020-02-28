@@ -98,7 +98,7 @@ const CameraInfo &CameraComponent::getCameraInfo() const
     return mCamInfo;
 }
 
-const StorageInfo &CameraComponent::getStorageInfo() const
+const StorageInfo * CameraComponent::getStorageInfo() const
 {
     return mStoreInfo;
 }

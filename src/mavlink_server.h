@@ -21,6 +21,7 @@
 #include <mavlink.h>
 #include <memory>
 #include <vector>
+#include <fstream>
 
 #include "CameraComponent.h"
 #include "conf_file.h"
@@ -68,6 +69,7 @@ private:
     hal3_commands hal3 = {};
     std::string _rtsp_server_addr;
 
+    double get_uptime();
     void _message_received(const struct sockaddr_in &sockaddr, const struct buffer &buf);
     void _handle_mavlink_message(const struct sockaddr_in &addr, mavlink_message_t *msg);
     void _handle_request_camera_information(const struct sockaddr_in &addr,

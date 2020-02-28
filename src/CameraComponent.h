@@ -40,7 +40,7 @@ public:
     int start();
     int stop();
     const CameraInfo &getCameraInfo() const;
-    const StorageInfo &getStorageInfo() const;
+    const StorageInfo * getStorageInfo() const;
     const std::map<std::string, std::string> &getParamList() const;
     int getParamType(const char *param_id, size_t id_size);
     virtual int getParam(const char *param_id, size_t id_size, char *param_value,
@@ -72,7 +72,7 @@ public:
 private:
     std::string mCamDevName;               /* Camera device name */
     CameraInfo mCamInfo;                   /* Camera Information Structure */
-    StorageInfo mStoreInfo;                /* Storage Information Structure */
+    StorageInfo * mStoreInfo;                /* Storage Information Structure */
     CameraParameters mCamParam;            /* Camera Parameters Object */
     std::shared_ptr<CameraDevice> mCamDev; /* Camera Device Object */
     std::shared_ptr<ImageCapture> mImgCap; /* Image Capture Object */

@@ -8,6 +8,7 @@ StorageInfo::StorageInfo(std::string path) {
 }
 
 StorageInfo::StorageInfo() {
+    storagePath = "/mnt/sdcard";
     storage_id = 1;
     storage_count = 1;
     status = 2; /* ready */
@@ -17,6 +18,7 @@ StorageInfo::StorageInfo() {
     used = 40000.0;
     read_speed = 3000;
     write_speed = 30000;
+    updateInfo();
 }
 
 StorageInfo::~StorageInfo() {

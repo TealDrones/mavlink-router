@@ -292,12 +292,12 @@ void MavlinkServer::_handle_request_storage_information(const struct sockaddr_in
     CameraComponent *tgtComp = getCameraComponent(cmd.target_component);
     if (tgtComp) {
         // TODO:: Fill with appropriate value
-        const StorageInfo storeInfo = tgtComp->getStorageInfo();
+        const StorageInfo * storeInfo = tgtComp->getStorageInfo();
         mavlink_msg_storage_information_pack(_system_id, cmd.target_component, &msg, 0,
-                                             storeInfo.storage_id, storeInfo.storage_count,
-                                             storeInfo.status, storeInfo.capacity,
-                                             storeInfo.used, storeInfo.available,
-                                             storeInfo.read_speed, storeInfo.write_speed);
+                                             storeInfo->storage_id, storeInfo->storage_count,
+                                             storeInfo->status, storeInfo->capacity,
+                                             storeInfo->used, storeInfo->available,
+                                             storeInfo->read_speed, storeInfo->write_speed);
 
         if (!_send_mavlink_message(&addr, msg)) {
             log_error("Sending storage information failed for camera %d.", cmd.target_component);
@@ -915,13 +915,13 @@ bool MavlinkServer::_send_camera_capture_status(int compid, const struct sockadd
     CameraComponent *tgtComp = getCameraComponent(compid);
 
     if (tgtComp) {
-        const StorageInfo &storeInfo = tgtComp->getStorageInfo();
+        const StorageInfo * storeInfo = tgtComp->getStorageInfo();
         mavlink_message_t msg;
         uint32_t time_boot_ms = 0;
         uint8_t image_status = 0;
         int image_interval = 0;
         uint32_t recording_time_ms = 0;
-        int available_capacity = storeInfo.available; // in MiB
+        int available_capacity = storeInfo->available; // in MiB
         // Get image capture status
         tgtComp->getImageCaptureStatus(image_status, image_interval);
         // Get video capture status
@@ -1113,4 +1113,18 @@ uint32_t MavlinkServer::dcm2mavCameraMode(CameraParameters::Mode mode)
     }
 
     return ret;
+}
+
+
+double MavlinkServer::get_uptime()
+{
+    std::chrono::milliseconds uptime(0u);
+    double uptime_seconds;
+    if (std::ifstream("/proc/uptime", std::ios::in) >> uptime_seconds)
+    {
+    uptime = std::chrono::milliseconds(
+        static_cast<unsigned long long>(uptime_seconds*1000.0)
+    );
+    }
+    return uptime_seconds;
 }

@@ -158,9 +158,11 @@ BASE_FILES = \
 	src/v4l2_interface.h \
 	src/mqueue.h \
 	src/mqueue.cpp \
-        src/GimbalManager.cpp \
-        src/GimbalManager.h \
-	plugins/V4l2Camera/PluginV4l2.h\
+    src/GimbalManager.cpp \
+    src/GimbalManager.h \
+    src/StorageInfo.cpp \
+    src/StorageInfo.h \
+	plugins/V4l2Camera/PluginV4l2.h \
 	plugins/V4l2Camera/PluginV4l2.cpp \
 	plugins/V4l2Camera/CameraDeviceV4l2.cpp \
 	plugins/V4l2Camera/CameraDeviceV4l2.h

@@ -22,7 +22,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <time.h>
-#include <fstream>
+
 
 #include "macro.h"
 
@@ -64,8 +64,6 @@ usec_t ts_usec(const struct timespec *ts);
 int mkdir_p(const char *path, int len, mode_t mode);
 
 size_t mem_cpy(void *dest, size_t dsize, const void *src, size_t ssize, size_t cnt);
-double get_time();
-
 
 #ifdef __cplusplus
 }

@@ -6,6 +6,7 @@
 class StorageInfo {
 
 public:
+    StorageInfo();
     StorageInfo(std::string);
     ~StorageInfo();
     uint8_t storage_id;
@@ -21,7 +22,6 @@ public:
     float write_speed;
 
     void updateInfo();
-
 
 private:
     std::string storagePath;
