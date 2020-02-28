@@ -211,7 +211,7 @@ void MavlinkServer::_handle_request_video_stream_information(const struct sockad
         int flags;
         if (cmd.target_component == IMX412_COMP_ID) {
 			stream_w = 1280;
-			stream_h = 720;
+			stream_h = 768;
             flags = VIDEO_STREAM_STATUS_FLAGS_RUNNING;
 		} else {
 			stream_w = 640;
@@ -489,7 +489,7 @@ void MavlinkServer::_handle_request_video_stream_status(const struct sockaddr_in
 
         if (cmd.target_component == IMX412_COMP_ID) {
             stream_w = 1280;
-            stream_h = 720;
+            stream_h = 768;
         } else {
             stream_w = 640;
             stream_h = 512;
