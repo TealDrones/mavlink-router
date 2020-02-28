@@ -162,6 +162,8 @@ BASE_FILES = \
     src/GimbalManager.h \
     src/StorageInfo.cpp \
     src/StorageInfo.h \
+    src/Timer.cpp \
+    src/Timer.h \
 	plugins/V4l2Camera/PluginV4l2.h \
 	plugins/V4l2Camera/PluginV4l2.cpp \
 	plugins/V4l2Camera/CameraDeviceV4l2.cpp \
@@ -229,6 +231,17 @@ test_test_custom_stream_SOURCES = \
 	plugins/CustomCamera/PluginCustom.h \
 	plugins/CustomCamera/CameraDeviceCustom.cpp \
 	plugins/CustomCamera/CameraDeviceCustom.h
+
+#EXTRA_PROGRAMS += test/test-timer
+
+#test_test_timer_LDADD = $(GLIB_LIBS)
+
+#test_test_timerSOURCES = \
+#	test/test_timer.cpp \
+#	src/Timer.cpp \
+#	src/Timer.h \
+#	src/log.cpp \
+#	src/log.h
 
 if ENABLE_AVAHI
 EXTRA_PROGRAMS += test/test-rtsp-udp-stream-discovery

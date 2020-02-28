@@ -1,13 +1,16 @@
 #pragma once
 
-#include <iostream>
-#include <experimental/filesystem>
+#include <sys/statvfs.h>
+#include <string>
+#include <iostream> 
+
+using namespace std;
 
 class StorageInfo {
 
 public:
     StorageInfo();
-    StorageInfo(std::string);
+    StorageInfo(string);
     ~StorageInfo();
     uint8_t storage_id;
     uint8_t storage_count;
@@ -22,7 +25,6 @@ public:
     float write_speed;
 
     void updateInfo();
-
 private:
-    std::string storagePath;
+    string storagePath;
 };
