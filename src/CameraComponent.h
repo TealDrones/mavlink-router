@@ -84,7 +84,6 @@ private:
     std::shared_ptr<VideoSettings> mVidSetting; /* Video Setting Structure */
     std::shared_ptr<VideoStream> mVidStream; /* Video Streaming Object*/
 
-    void initStorageInfo(struct StorageInfo &storeInfo);
     int setVideoFrameFormat(uint32_t param_value);
     int setVideoSize(uint32_t param_value);
     std::string toString(const char *buf, size_t buf_size);

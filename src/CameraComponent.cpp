@@ -35,8 +35,7 @@ CameraComponent::CameraComponent(std::shared_ptr<CameraDevice> device)
 
     // Get info from the camera device
     mCamDev->getInfo(mCamInfo);
-
-    initStorageInfo(mStoreInfo);
+    mStoreInfo = new StorageInfo();
 }
 
 CameraComponent::~CameraComponent()
@@ -122,19 +121,6 @@ std::shared_ptr<ImageCapture> CameraComponent::getImageCapture()
 std::shared_ptr<VideoCapture> CameraComponent::getVideoCapture()
 {
     return mVidCap;
-}
-
-void CameraComponent::initStorageInfo(struct StorageInfo &storeInfo)
-{
-    // TODO:: Fill storage details with real values
-    storeInfo.storage_id = 1;
-    storeInfo.storage_count = 1;
-    storeInfo.status = 2; /*r eady */
-    storeInfo.capacity = 80000.0;
-    storeInfo.available = 40000.0;
-    storeInfo.free = 400000.0;
-    storeInfo.read_speed = 3000;
-    storeInfo.write_speed = 30000;
 }
 
 int CameraComponent::getParamType(const char *param_id, size_t id_size)
