@@ -429,6 +429,7 @@ void MavlinkServer::_handle_video_start_capture(const struct sockaddr_in &addr,
     log_debug("%s", __func__);
     bool success = false;
     image_callback_t cb_data;
+    recordTimer->start(0);
 
     CameraComponent *tgtComp = getCameraComponent(cmd.target_component);
     if (tgtComp) {
@@ -458,6 +459,7 @@ void MavlinkServer::_handle_video_start_capture(const struct sockaddr_in &addr,
                 if (!tgtComp->startVideoCapture((uint32_t)cmd.param2 /*camera_Capture_status freq*/)) {
                     success = true;
                     video_status = 1;
+                    recordTimer->start(0);
                 }
             }  
         }
@@ -917,7 +919,7 @@ bool MavlinkServer::_send_camera_capture_status(int compid, const struct sockadd
     if (tgtComp) {
         const StorageInfo * storeInfo = tgtComp->getStorageInfo();
         mavlink_message_t msg;
-        uint32_t time_boot_ms = 0;
+        uint32_t time_boot_ms = bootTimer->timeOn();
         uint8_t image_status = 0;
         int image_interval = 0;
         uint32_t recording_time_ms = 0;

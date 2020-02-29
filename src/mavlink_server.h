@@ -28,6 +28,7 @@
 #include "socket.h"
 #include "mqueue.h"
 #include "GimbalManager.h"
+#include "Timer.h"
 
 typedef struct image_callback {
     int comp_id;             /* Component ID */
@@ -63,7 +64,8 @@ private:
     std::map<int, CameraComponent *> compIdToObj;
     mqueue hal_server;
     GimbalManager * gimbalManager;
-
+    Timer * bootTimer = new Timer();
+    Timer * recordTimer = new Timer();
     uint8_t video_status;
     int _tilt;
     hal3_commands hal3 = {};
