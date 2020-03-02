@@ -16,6 +16,6 @@ public:
     unsigned long timeLeft();
     unsigned long timeOn();
 protected:
-    long m_period;
-    long m_target;
+    unsigned long m_period;
+    unsigned long m_target;
 };

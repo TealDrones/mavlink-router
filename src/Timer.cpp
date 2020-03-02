@@ -5,31 +5,17 @@
 #include "Timer.h"
 
 Timer::Timer()
-  : m_target(0)
-  , m_period(0)
+  : m_period(0)
+  , m_target(0)
 {
     start(0);
 }
 
 Timer::Timer(unsigned long interval)
-  : m_target(0)
-  , m_period(0)
+  : m_period(0)
+  , m_target(0)
 {
     start(interval);
-}
-
-unsigned long Timer::GetTime ()
-{
-    unsigned long         ms; // Milliseconds
-    time_t          s;  // Seconds
-    struct timespec spec;
-
-    clock_gettime(CLOCK_REALTIME, &spec);
-
-    ms = spec.tv_sec * 1000;
-    ms += (unsigned long) round(spec.tv_nsec / 1.0e6); // Convert nanoseconds to milliseconds
-
-    return ms;
 }
 
 void Timer::start(unsigned long interval)
@@ -37,6 +23,19 @@ void Timer::start(unsigned long interval)
     m_period = interval * 1000;
     m_target = GetTime() + m_period;
 }
+
+unsigned long Timer::GetTime ()
+{
+    unsigned long ms; // Milliseconds
+    time_t s;  // Seconds
+    struct timespec spec;
+    clock_gettime(CLOCK_REALTIME, &spec);
+    ms = spec.tv_sec * 1000;
+    ms += (unsigned long) round(spec.tv_nsec / 1.0e6); // Convert nanoseconds to milliseconds
+
+    return ms;
+}
+
 
 bool Timer::timeOut()
 {

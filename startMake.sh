@@ -2,7 +2,7 @@
 source /usr/local/rb3-oecore-x86_64/environment-setup-aarch64-oe-linux 
 ./autogen.sh
 ./configure CFLAGS='-g -O2' CXXFLAGS='-g -O2' --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib --with-rootprefix= --with-rootlibdir=/lib --host=aarch64-oe-linux --enable-mavlink
-if make -j8; then
+if make -j16; then
 	scp dcm pi@dmz.tealdrones.com:/home/pi/code/distro/dcm.x.x.x
 	echo "Success +++++++++++++++++++++++++"
 else
