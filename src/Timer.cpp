@@ -27,7 +27,7 @@ void Timer::start(unsigned long interval)
 unsigned long Timer::GetTime ()
 {
     unsigned long ms; // Milliseconds
-    time_t s;  // Seconds
+//    time_t s;  // Seconds
     struct timespec spec;
     clock_gettime(CLOCK_REALTIME, &spec);
     ms = spec.tv_sec * 1000;
