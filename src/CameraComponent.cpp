@@ -351,10 +351,7 @@ uint8_t CameraComponent::getVideoCaptureStatus()
     if (!mVidCap)
         return 0;
 
-    if (VideoCapture::STATE_RUN == mVidCap->getState())
-        return 1;
-
-    return 0;
+    return (VideoCapture::STATE_RUN == mVidCap->getState());
 }
 
 int CameraComponent::setVideoSize(uint32_t param_value)

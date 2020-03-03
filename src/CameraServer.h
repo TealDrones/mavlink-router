@@ -47,12 +47,16 @@ private:
     std::string readImgCapLocation(const ConfFile &conf) const;
     bool readVidCapSettings(const ConfFile &conf, VideoSettings &vidSetting) const;
     std::string readVidCapLocation(const ConfFile &conf) const;
-    std::string readGazeboCamTopic(const ConfFile &conf) const;
     PluginManager mPluginManager;
+
+#ifdef ENABLE_GAZEBO
+    std::string readGazeboCamTopic(const ConfFile &conf) const;
+#endif
 
 #ifdef ENABLE_MAVLINK
     MavlinkServer mMavlinkServer;
 #endif
+
 #ifdef ENABLE_AVAHI
     std::unique_ptr<AvahiPublisher> mAvahiPublisher;
 #endif

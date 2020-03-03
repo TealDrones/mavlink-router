@@ -339,6 +339,7 @@ std::string CameraServer::readVidCapLocation(const ConfFile &conf) const
     return ret;
 }
 
+#ifdef ENABLE_GAZEBO
 std::string CameraServer::readGazeboCamTopic(const ConfFile &conf) const
 {
     // Location must start and end with "/"
@@ -355,3 +356,4 @@ std::string CameraServer::readGazeboCamTopic(const ConfFile &conf) const
 
     return ret;
 }
+#endif
