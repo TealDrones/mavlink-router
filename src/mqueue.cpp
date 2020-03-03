@@ -78,7 +78,6 @@ bool mqueue::write (char* message)
 		if (msgsnd(msqid, &buf, sizeof buf.mtext, IPC_NOWAIT) != -1) {
 
 			int counter = 0;
-			retval = true;
 			while (get_num_messages() == 1) {
 
 				if (counter == WAIT_MSECONDS) {
@@ -87,9 +86,7 @@ bool mqueue::write (char* message)
 					retval = false;
 					break;
 				}
-
 				counter = counter + 1;
-				
 				/* Checking message's status for WAIT_MSECONDS milliseconds */
 				usleep(1000);
 			}

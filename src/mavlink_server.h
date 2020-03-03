@@ -55,6 +55,7 @@ public:
 private:
     bool _is_running;
     unsigned int _timeout_handler;
+    unsigned int _cam_stats_handler;
     UDPSocket _udp;
     struct sockaddr_in _broadcast_addr = {};
     bool _is_sys_id_found;

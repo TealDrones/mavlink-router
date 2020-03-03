@@ -43,7 +43,7 @@ void StorageInfo::updateInfo()
     // printf("free inodes for unprivileged users: f_favail: %lu\n", (unsigned long) vfs.f_favail);
     // printf("filesystem ID: f_fsid: %#lx\n",  (unsigned long) vfs.f_fsid);
 
-    long mb = 1024*1024;
+    long mb = 1024;
     long block_size = (long) vfs.f_bsize;
     long fragement_size = (long) vfs.f_frsize;
     unsigned long fragment_blocks = (unsigned long) vfs.f_blocks;
@@ -53,6 +53,6 @@ void StorageInfo::updateInfo()
     available = block_size * free_blocks / mb;
     used = (capacity-available);
 
-    cout << ".\tCapacity\tAvailable\tused\n" << storagePath << "\t" << capacity << "\t" << available << "\t" << used << ' MB\n';
+    cout << ".\tCapacity\tAvailable\tused\n" << storagePath << "\t" << capacity << "\t" << available << "\t" << used << " MB\n";
 
 }

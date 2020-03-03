@@ -88,7 +88,7 @@ int CameraComponent::stop()
     mCamDev->stop();
 
     // Uninit the camera device
-    mCamDev->uninit();
+    mCamDev->uninit(); 
 
     return 0;
 }
@@ -201,28 +201,18 @@ int CameraComponent::setImageCaptureSettings(ImageSettings &imgSetting)
  * progress */
 void CameraComponent::getImageCaptureStatus(uint8_t &status, int &interval)
 {
+    status = 0;
     if (!mImgCap) {
-        status = 0;
         interval = 0;
         return;
     }
 
     // get interval
     interval = mImgCap->getInterval();
-    switch (mImgCap->getState()) {
-    case ImageCapture::STATE_RUN:
+    if (ImageCapture::STATE_RUN == mImgCap->getState()) {
         status = (interval > 0) ? 3 : 1;
-        break;
-    case ImageCapture::STATE_ERROR:
-    case ImageCapture::STATE_IDLE:
-    case ImageCapture::STATE_INIT:
-    default:
-        status = 0;
-        break;
     }
-
     log_info("%s Status:%d Interval:%d", __func__, status, interval);
-    return;
 }
 
 int CameraComponent::startImageCapture(int interval, int count, capture_callback_t cb)
@@ -336,24 +326,23 @@ int CameraComponent::startVideoCapture(int status_freq)
         ret = mVidCap->start();
         if (ret) {
             mVidCap->uninit();
-            log_info("Reseting video capture, fail to set states");
+            log_error("Reseting video capture, fail to set states");
         }
     }
 
     return ret;
 }
 
+// TODO: why does it always return 0 - change return type?
 int CameraComponent::stopVideoCapture()
 {
-    int ret = 0;
-
     if (!mVidCap)
         return 0;
 
     mVidCap->stop();
     mVidCap->uninit();
 
-    return ret;
+    return 0;
 }
 
 /* 0: idle, 1: capture in progress */
@@ -362,22 +351,10 @@ uint8_t CameraComponent::getVideoCaptureStatus()
     if (!mVidCap)
         return 0;
 
-    uint8_t ret = 0;
+    if (VideoCapture::STATE_RUN == mVidCap->getState())
+        return 1;
 
-    switch (mVidCap->getState()) {
-    case VideoCapture::STATE_RUN:
-        ret = 1;
-        break;
-    case VideoCapture::STATE_ERROR:
-    case VideoCapture::STATE_IDLE:
-    case VideoCapture::STATE_INIT:
-    default:
-        ret = 0;
-        break;
-    }
-
-    log_info("%s Status:%d", __func__, ret);
-    return ret;
+    return 0;
 }
 
 int CameraComponent::setVideoSize(uint32_t param_value)
@@ -448,21 +425,12 @@ int CameraComponent::startVideoStream(const bool isUdp)
 
 int CameraComponent::stopVideoStream()
 {
-    int ret = 0;
 
     if (!mVidStream)
         return 0;
 
-    ret = mVidStream->stop();
-    if (ret) {
-        log_error("Error in Video Stream stop");
-    }
-
-    ret = mVidStream->uninit();
-    if (ret) {
-        log_error("Error in Video Stream uninit");
-    }
-
+    mVidStream->stop();
+    mVidStream->uninit();
     mVidStream.reset();
 
     return 0;
@@ -470,25 +438,12 @@ int CameraComponent::stopVideoStream()
 
 uint8_t CameraComponent::getVideoStreamStatus() const
 {
-    uint8_t ret = 0;
-
     if (!mVidStream)
         return 0;
-
-    switch (mVidStream->getState()) {
-    case VideoStream::STATE_ERROR:
-    case VideoStream::STATE_IDLE:
-    case VideoStream::STATE_INIT:
-        ret = 0;
-        break;
-    case VideoStream::STATE_RUN:
-        ret = 1;
-        break;
-    default:
-        ret = 0;
-        break;
+    int ret = 0;
+    if ( VideoStream::STATE_RUN == mVidStream->getState()) {
+        ret=1;
     }
-
     log_debug("%s Status:%d", __func__, ret);
     return ret;
 }
