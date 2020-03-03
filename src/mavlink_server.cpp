@@ -434,7 +434,6 @@ void MavlinkServer::_handle_video_start_capture(const struct sockaddr_in &addr,
     log_debug("%s", __func__);
     bool success = false;
     image_callback_t cb_data;
-    recordTimer->start(0);
 
     CameraComponent *tgtComp = getCameraComponent(cmd.target_component);
     if (tgtComp) {
@@ -455,12 +454,11 @@ void MavlinkServer::_handle_video_start_capture(const struct sockaddr_in &addr,
                 usleep(15000);
                 success = tgtComp->getVideoStream()->startRecording(nexturl);
             } else {
-                success = tgtComp->startVideoCapture( (uint32_t)cmd.param2 /*camera_Capture_status freq*/);
+                success = tgtComp->startVideoCapture( (uint32_t)cmd.param2 /*camera_capture_status freq*/, std::bind(&MavlinkServer::_video_captured_cb, this, cb_data, _1, _2));
             }
         }
     }
     if (success) {
-        recordTimer->start(0);
         video_status = 1;
     }
     _send_ack(addr, cmd.command, cmd.target_component, success);
@@ -543,6 +541,18 @@ void MavlinkServer::_handle_video_stop_capture(const struct sockaddr_in &addr,
         }
     }
     _send_ack(addr, cmd.command, cmd.target_component, success);
+}
+
+/** 
+ * 
+ * this is called back by camera device, so that the capture status can be handled
+ * 
+ */
+
+void MavlinkServer::_video_captured_cb(image_callback_t cb_data, int result, int seq_num)
+{
+    log_debug("%s Sending Capture Status: result:%d seq:%d Comp Id:%d", __func__, result, seq_num, cb_data.comp_id);
+    _send_camera_capture_status(cb_data.comp_id, cb_data.addr);
 }
 
 void MavlinkServer::_handle_request_camera_capture_status(const struct sockaddr_in &addr,
@@ -916,14 +926,13 @@ bool MavlinkServer::_send_camera_capture_status(int compid, const struct sockadd
         uint32_t time_boot_ms = bootTimer->timeOn();
         uint8_t image_status = 0;
         int image_interval = 0;
-        uint32_t recording_time_ms = 0;
+        uint32_t recording_time_ms = tgtComp->getRecordMs();
         int available_capacity = storeInfo->available; // in MiB
         // Get image capture status
         tgtComp->getImageCaptureStatus(image_status, image_interval);
         // Get video capture status
         video_status = tgtComp->getVideoCaptureStatus();
-        log_info("%s Video Status %d", __func__, video_status);
-
+        log_info("%s need: 1 got: %d", __func__, video_status);
         mavlink_msg_camera_capture_status_pack(_system_id, compid, &msg, time_boot_ms, image_status,
                                                video_status, static_cast<float>(image_interval),
                                                recording_time_ms,

@@ -16,7 +16,9 @@
  * limitations under the License.
  */
 #include <cstring>
+#include <assert.h>
 
+#include "mainloop.h"
 #include "CameraComponent.h"
 #include "ImageCaptureGst.h"
 #include "VideoCaptureGst.h"
@@ -289,9 +291,26 @@ int CameraComponent::setVideoCaptureSettings(VideoSettings &vidSetting)
     return 0;
 }
 
-int CameraComponent::startVideoCapture(int status_freq)
+/**
+ * 
+ * Friends
+ * 
+ */
+bool _camera_stats_cb(void *data) {
+    assert(data);
+    CameraComponent * tgtComp = (CameraComponent *) data;
+    // TODO :: Get the file path of the image and host it via http
+    if (tgtComp->mVidCapCB) {
+        tgtComp->mVidCapCB(0, tgtComp->mRecordTimer->timeOn());
+    }
+    return true;
+}
+
+
+int CameraComponent::startVideoCapture(int status_freq, capture_callback_t status_cb)
 {
     log_info("CAMERA_CAPTURE_STATUS frequency %1d", status_freq);
+    mVidCapCB = status_cb;
     int ret = 0;
 
     if (mVidCap) {
@@ -318,9 +337,7 @@ int CameraComponent::startVideoCapture(int status_freq)
 
     mVidCap->stop();
     mVidCap->uninit();
-
     ret = mVidCap->init();
-    log_info("init video capture");
 
     if (!ret) {
         ret = mVidCap->start();
@@ -329,7 +346,12 @@ int CameraComponent::startVideoCapture(int status_freq)
             log_error("Reseting video capture, fail to set states");
         }
     }
-
+    if (!ret) {
+        log_info("init video capture");
+        mRecordTimer->start(0);
+        status_freq = (status_freq > 0) ? status_freq : 500;
+        _cam_stats_handler = Mainloop::get_mainloop()->add_timeout(status_freq, _camera_stats_cb, this);
+    }
     return ret;
 }
 
@@ -341,9 +363,15 @@ int CameraComponent::stopVideoCapture()
 
     mVidCap->stop();
     mVidCap->uninit();
-
+    Mainloop::get_mainloop()->del_timeout(_cam_stats_handler);
     return 0;
 }
+
+int CameraComponent::getRecordMs()
+{
+    return mRecordTimer->timeOn();
+} 
+
 
 /* 0: idle, 1: capture in progress */
 uint8_t CameraComponent::getVideoCaptureStatus()
@@ -451,3 +479,4 @@ std::string CameraComponent::toString(const char *buf, size_t buf_size)
     const char *end = std::find(buf, buf + buf_size, '\0');
     return std::string(buf, end);
 }
+

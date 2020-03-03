@@ -22,6 +22,7 @@
 #include <vector>
 #include <functional>
 
+#include "Timer.h"
 #include "StorageInfo.h"
 #include "CameraDevice.h"
 #include "CameraParameters.h"
@@ -58,9 +59,10 @@ public:
     void cbImageCaptured(int result, int seq_num);
     int setVideoCaptureLocation(std::string vidPath);
     int setVideoCaptureSettings(VideoSettings &vidSetting);
-    virtual int startVideoCapture(int status_freq);
+    virtual int startVideoCapture(int status_freq, capture_callback_t status_cb);
     virtual int stopVideoCapture();
     virtual uint8_t getVideoCaptureStatus();
+    virtual int getRecordMs();
     int startVideoStream(const bool isUdp);
     int stopVideoStream();
     uint8_t getVideoStreamStatus() const;
@@ -70,6 +72,7 @@ public:
     std::shared_ptr<VideoCapture> getVideoCapture();
 
 private:
+    unsigned int _cam_stats_handler;
     std::string mCamDevName;               /* Camera device name */
     CameraInfo mCamInfo;                   /* Camera Information Structure */
     StorageInfo * mStoreInfo;                /* Storage Information Structure */
@@ -83,8 +86,13 @@ private:
     std::string mVidPath;
     std::shared_ptr<VideoSettings> mVidSetting; /* Video Setting Structure */
     std::shared_ptr<VideoStream> mVidStream; /* Video Streaming Object*/
+    std::function<void(int result, int seq_num)> mVidCapCB;
 
+    Timer * mRecordTimer = new Timer(); /* how long has recording been happening */
     int setVideoFrameFormat(uint32_t param_value);
     int setVideoSize(uint32_t param_value);
     std::string toString(const char *buf, size_t buf_size);
+
+    friend bool _camera_stats_cb(void *data);
+
 };

@@ -17,18 +17,18 @@
  */
 #pragma once
 
+#include <fstream>
 #include <map>
 #include <mavlink.h>
 #include <memory>
 #include <vector>
-#include <fstream>
 
 #include "CameraComponent.h"
-#include "conf_file.h"
-#include "socket.h"
-#include "mqueue.h"
 #include "GimbalManager.h"
 #include "Timer.h"
+#include "conf_file.h"
+#include "mqueue.h"
+#include "socket.h"
 
 typedef struct image_callback {
     int comp_id;             /* Component ID */
@@ -64,9 +64,8 @@ private:
     int zoom_level;
     std::map<int, CameraComponent *> compIdToObj;
     mqueue hal_server;
-    GimbalManager * gimbalManager;
-    Timer * bootTimer = new Timer();
-    Timer * recordTimer = new Timer();
+    GimbalManager *gimbalManager;
+    Timer *bootTimer = new Timer();
     uint8_t video_status;
     int _tilt;
     hal3_commands hal3 = {};
@@ -81,15 +80,17 @@ private:
                                          mavlink_command_long_t &cmd);
     void _handle_request_storage_information(const struct sockaddr_in &addr,
                                              mavlink_command_long_t &cmd);
-    void _handle_set_camera_mode(const struct sockaddr_in &addr,
-                                                        mavlink_command_long_t &cmd);
-    void _handle_request_video_stream_status(const struct sockaddr_in &addr, mavlink_command_long_t &cmd);
+    void _handle_set_camera_mode(const struct sockaddr_in &addr, mavlink_command_long_t &cmd);
     void _handle_image_start_capture(const struct sockaddr_in &addr, mavlink_command_long_t &cmd);
     void _handle_image_stop_capture(const struct sockaddr_in &addr, mavlink_command_long_t &cmd);
-    void _handle_request_video_stream_information(const sockaddr_in&, mavlink_command_long_t&);
+    void _image_captured_cb(image_callback_t cb_data, int result, int seq_num);
+
+    void _handle_request_video_stream_information(const sockaddr_in &, mavlink_command_long_t &);
     void _handle_video_start_capture(const struct sockaddr_in &addr, mavlink_command_long_t &cmd);
     void _handle_video_stop_capture(const struct sockaddr_in &addr, mavlink_command_long_t &cmd);
-    void _image_captured_cb(image_callback_t cb_data, int result, int seq_num);
+    void _handle_request_video_stream_status(const struct sockaddr_in &addr,
+                                             mavlink_command_long_t &cmd);
+    void _video_captured_cb(image_callback_t cb_data, int result, int ms_recorded);
     void _handle_request_camera_capture_status(const struct sockaddr_in &addr,
                                                mavlink_command_long_t &cmd);
     void _handle_param_ext_request_read(const struct sockaddr_in &addr, mavlink_message_t *msg);
@@ -99,13 +100,14 @@ private:
     void _handle_camera_zoom(const struct sockaddr_in &addr, mavlink_command_long_t &cmd);
     void _handle_gimbal_movement(const struct sockaddr_in &addr, mavlink_command_long_t &cmd);
     void _handle_heartbeat(const struct sockaddr_in &addr, mavlink_message_t *msg);
-    void _handle_arm_disarm(const sockaddr_in&, mavlink_command_long_t&);
+    void _handle_arm_disarm(const sockaddr_in &, mavlink_command_long_t &);
     bool _send_camera_capture_status(int compid, const struct sockaddr_in &addr);
     bool _send_mavlink_message(const struct sockaddr_in *addr, mavlink_message_t &msg);
     void _send_ack(const struct sockaddr_in &addr, int cmd, int comp_id, bool success);
 #if 0
     const Stream::FrameSize *_find_best_frame_size(Stream &s, uint32_t w, uint32_t v);
 #endif
+
     friend bool _heartbeat_cb(void *data);
 
     CameraParameters::Mode mav2dcmCameraMode(uint32_t mode);

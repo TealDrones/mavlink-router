@@ -62,7 +62,7 @@ CameraServer::CameraServer(const ConfFile &conf)
 
         // check if blacklisted
         if (blackList.find(deviceID) != blackList.end()) {
-            log_info("Device is black listed : %s", deviceID.c_str());
+//            log_info("Device is black listed : %s", deviceID.c_str());
             continue;
         }
 
