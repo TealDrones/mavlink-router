@@ -143,6 +143,8 @@ BASE_FILES = \
 	src/ImageCapture.h \
 	src/ImageCaptureGst.h \
 	src/ImageCaptureGst.cpp \
+	src/ImageCaptureHal.h \
+	src/ImageCaptureHal.cpp \
 	src/VideoStream.h \
 	src/VideoStreamUdp.h \
 	src/VideoStreamUdp.cpp \
@@ -151,6 +153,8 @@ BASE_FILES = \
 	src/VideoCapture.h \
 	src/VideoCaptureGst.h \
 	src/VideoCaptureGst.cpp \
+	src/VideoCaptureHal.h \
+	src/VideoCaptureHal.cpp \
 	src/PluginManager.h \
 	src/PluginManager.cpp \
 	src/PluginBase.h \
