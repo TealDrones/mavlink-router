@@ -362,17 +362,25 @@ void MavlinkServer::_handle_image_start_capture(const struct sockaddr_in &addr,
                 success = tgtComp->getVideoStream()->takeSnapshot(nexturl);
 
                 mavlink_msg_camera_image_captured_pack(
-                    _system_id, cmd.target_component, &msg, 0 /*time_boot_ms*/, 0 /*time_utc*/,
-                    1 /*camera_id*/, 0 /*lat*/, 0 /*lon*/, 0 /*alt*/, 0 /*relative_alt*/, q,
-                    0 /*image_index*/, success /*capture_result*/, nexturl.c_str() /*file_url*/);
+                    _system_id, cmd.target_component, &msg, 
+                    bootTimer->timeOn() /*time_boot_ms*/, 
+                    0 /*time_utc*/,
+                    1 /*camera_id*/, 
+                    0 /*lat*/, 
+                    0 /*lon*/, 
+                    0 /*alt*/, 
+                    0 /*relative_alt*/, q,
+                    0 /*image_index*/, 
+                    success /*capture_result*/, 
+                    nexturl.c_str() /*file_url*/);
 
                 if (!_send_mavlink_message(&cb_data.addr, msg)) {
-                    log_error("Sending camera image captured failed for camera %d.",
-                              cb_data.comp_id);
+                    log_error("Sending camera image captured failed for camera %d.", cb_data.comp_id);
                 }
             } else {
                 if (!tgtComp->startImageCapture(
-                        (uint32_t)cmd.param2 /*interval*/, (uint32_t)cmd.param3 /*count*/,
+                        (uint32_t)cmd.param2 /*interval*/, 
+                        (uint32_t)cmd.param3 /*count*/,
                         std::bind(&MavlinkServer::_image_captured_cb, this, cb_data, _1, _2)))
                     success = true;
             }
@@ -792,14 +800,9 @@ void MavlinkServer::_handle_mavlink_message(const struct sockaddr_in &addr, mavl
     if (msg->msgid == MAVLINK_MSG_ID_COMMAND_LONG) {
         mavlink_command_long_t cmd;
         mavlink_msg_command_long_decode(msg, &cmd);
-        log_info("Command received: (sysid: %d compid: %d msgid: %d)", cmd.target_system,
-                 cmd.target_component, cmd.command);
 
         if (cmd.target_system != _system_id || cmd.target_component < MAV_COMP_ID_CAMERA
-            || cmd.target_component > MAV_COMP_ID_CAMERA6)
-            return;
-
-        if (compIdToObj.find(cmd.target_component) == compIdToObj.end())
+            || cmd.target_component > MAV_COMP_ID_CAMERA6 || compIdToObj.find(cmd.target_component) == compIdToObj.end())
             return;
 
         switch (cmd.command) {
@@ -876,7 +879,7 @@ void MavlinkServer::_handle_mavlink_message(const struct sockaddr_in &addr, mavl
             log_info("----------MAV_CMD_DO_MOUNT_STUFF   **********++++++++++=========----------");
             break;
         default:
-            log_info("Command %d unhandled. Discarding.", cmd.command);
+            log_info("Command unhandled: (sysid: %d compid: %d msgid: %d)", cmd.target_system, cmd.target_component, cmd.command);
             break;
         }
     } else {
@@ -895,7 +898,7 @@ void MavlinkServer::_handle_mavlink_message(const struct sockaddr_in &addr, mavl
             this->_handle_param_ext_set(addr, msg);
             break;
         default:
-            // log_info("Message %d unhandled, Discarding", msg->msgid);
+            log_info("Command unhandled: (sysid: %d compid: %d msgid: %d)", msg->sysid, msg->compid,msg->msgid);
             break;
         }
     }
@@ -981,8 +984,12 @@ bool _heartbeat_cb(void *data)
 
     mavlink_msg_heartbeat_pack(server->_system_id, MAV_COMP_ID_GIMBAL, &msg, MAV_TYPE_GENERIC,
                                MAV_AUTOPILOT_INVALID, MAV_MODE_PREFLIGHT, 0, MAV_STATE_ACTIVE);
-    if (!server->_send_mavlink_message(nullptr, msg))
+    if (!server->_send_mavlink_message(nullptr, msg)) {
         log_error("Sending HEARTBEAT Gimbal failed.");
+    } else {
+        log_info("Sending HEARTBEAT Gimbal.");
+
+    }
 
     return true;
 }
@@ -1003,6 +1010,7 @@ void MavlinkServer::start()
 
 void MavlinkServer::stop()
 {
+    log_info("MAVLINK Stop");
     if (!_is_running)
         return;
     _is_running = false;

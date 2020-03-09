@@ -22,6 +22,8 @@
 #include "CameraComponent.h"
 #include "ImageCaptureGst.h"
 #include "VideoCaptureGst.h"
+#include "ImageCaptureHal.h"
+#include "VideoCaptureHal.h"
 #include "VideoStreamRtsp.h"
 #include "VideoStreamUdp.h"
 #ifdef ENABLE_MAVLINK
@@ -317,20 +319,14 @@ int CameraComponent::startVideoCapture(int status_freq, capture_callback_t statu
         log_info("Video capture instance enabled");
     } else {
         log_info("Creating new video capture pointer using settings");
-        mVidCap = std::make_shared<VideoCaptureGst>(mCamDev, *mVidSetting); // added GF
+        if (true) {
+            mVidCap = std::make_shared<VideoCaptureGst>(mCamDev, *mVidSetting); 
+        } else {
+            mVidCap = std::make_shared<VideoCaptureHal>(mCamDev, *mVidSetting); 
+        }
     }
 
     // TODO :: Check if video capture or video streaming is running
-
-    // check if settings are available
-    //~ if (mVidSetting){
-    //~ log_info("Creating new video capture pointer using settings");
-    //~ mVidCap = std::make_shared<VideoCaptureGst>(mCamDev, *mVidSetting);
-    //~ }
-    //~ else{
-    //~ log_info("Creating new video capture pointer with only device information");
-    //~ mVidCap = std::make_shared<VideoCaptureGst>(mCamDev);
-    //~ }
 
     if (!mVidPath.empty())
         mVidCap->setLocation(mVidPath);
@@ -349,7 +345,7 @@ int CameraComponent::startVideoCapture(int status_freq, capture_callback_t statu
     if (!ret) {
         log_info("init video capture");
         mRecordTimer->start(0);
-        status_freq = (status_freq > 0) ? status_freq : 500;
+        status_freq = (status_freq > 0) ? status_freq : 250;
         _cam_stats_handler = Mainloop::get_mainloop()->add_timeout(status_freq, _camera_stats_cb, this);
     }
     return ret;
@@ -438,8 +434,11 @@ int CameraComponent::startVideoStream(const bool isUdp)
     /*Initializing video capture submodule on component*/
 
     if (!mVidCap)
-        mVidCap = std::make_shared<VideoCaptureGst>(mCamDev, *mVidSetting);
-
+        if (true) {
+            mVidCap = std::make_shared<VideoCaptureGst>(mCamDev, *mVidSetting);
+        } else {
+            mVidCap = std::make_shared<VideoCaptureHal>(mCamDev, *mVidSetting);
+        }
     if (!mVidPath.empty())
         mVidCap->setLocation(mVidPath);
 
