@@ -570,7 +570,7 @@ std::string VideoStreamRtsp::getGstPipeline(std::map<std::string, std::string> &
         + " tee name=tenc tenc. ! " + getGstRtspVideoSink() + " traw. ! queue  ! valve name=vvideo drop=true ! " + getGstVideoEncoder(mEncFormat) + " name=encvideo " + " ! h264parse ! " +
         + " mpegtsmux ! tsparse ! multifilesink name=fsvideo location=/tmp/recording.ts async=false next-file=1 traw. ! queue ! valve name=vimage drop=true ! jpegenc ! queue ! multifilesink name=fsimage location=/tmp/img__%0004d.jpg async=false ";
 
-    log_debug("%s:%s", __func__, name.c_str());
+    log_debug("%s:%s name: %s source: %s ", __func__, name.c_str(),name, source);
     return name;
 }
 

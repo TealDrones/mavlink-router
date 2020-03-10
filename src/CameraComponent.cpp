@@ -299,6 +299,7 @@ int CameraComponent::setVideoCaptureSettings(VideoSettings &vidSetting)
  * 
  */
 bool _camera_stats_cb(void *data) {
+    log_info("cam status callback");
     assert(data);
     CameraComponent * tgtComp = (CameraComponent *) data;
     // TODO :: Get the file path of the image and host it via http
@@ -311,7 +312,7 @@ bool _camera_stats_cb(void *data) {
 
 int CameraComponent::startVideoCapture(int status_freq, capture_callback_t status_cb)
 {
-    log_info("CAMERA_CAPTURE_STATUS frequency %1d", status_freq);
+    log_info("%s status frequency %1d",__func__, status_freq);
     mVidCapCB = status_cb;
     int ret = 0;
 
@@ -372,9 +373,12 @@ int CameraComponent::getRecordMs()
 /* 0: idle, 1: capture in progress */
 uint8_t CameraComponent::getVideoCaptureStatus()
 {
-    if (!mVidCap)
-        return 0;
+    if (!mVidCap) {
+        log_info("%s Not vidcap Status:%d", __func__, 0);
 
+        return 0;
+    }
+    log_info("%s vid state:%d", __func__, mVidCap->getState());
     return (VideoCapture::STATE_RUN == mVidCap->getState());
 }
 

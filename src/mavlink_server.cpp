@@ -559,7 +559,7 @@ void MavlinkServer::_handle_video_stop_capture(const struct sockaddr_in &addr,
 
 void MavlinkServer::_video_captured_cb(image_callback_t cb_data, int result, int seq_num)
 {
-    log_debug("%s Sending Capture Status: result:%d seq:%d Comp Id:%d", __func__, result, seq_num, cb_data.comp_id);
+    log_debug("%s Callback Capture Status: result:%d seq:%d Comp Id:%d", __func__, result, seq_num, cb_data.comp_id);
     _send_camera_capture_status(cb_data.comp_id, cb_data.addr);
 }
 
@@ -879,7 +879,7 @@ void MavlinkServer::_handle_mavlink_message(const struct sockaddr_in &addr, mavl
             log_info("----------MAV_CMD_DO_MOUNT_STUFF   **********++++++++++=========----------");
             break;
         default:
-            log_info("Command unhandled: (sysid: %d compid: %d msgid: %d)", cmd.target_system, cmd.target_component, cmd.command);
+            log_debug("Command unhandled: (sysid: %d compid: %d msgid: %d)", cmd.target_system, cmd.target_component, cmd.command);
             break;
         }
     } else {
@@ -898,7 +898,7 @@ void MavlinkServer::_handle_mavlink_message(const struct sockaddr_in &addr, mavl
             this->_handle_param_ext_set(addr, msg);
             break;
         default:
-            log_info("Command unhandled: (sysid: %d compid: %d msgid: %d)", msg->sysid, msg->compid,msg->msgid);
+            log_debug("Extra Command unhandled: (sysid: %d compid: %d msgid: %d)", msg->sysid, msg->compid,msg->msgid);
             break;
         }
     }
@@ -963,6 +963,7 @@ bool MavlinkServer::_send_mavlink_message(const struct sockaddr_in *addr, mavlin
 
 bool _heartbeat_cb(void *data)
 {
+    log_debug("Heart Beat Callback");
     assert(data);
     MavlinkServer *server = (MavlinkServer *)data;
     mavlink_message_t msg;
@@ -974,8 +975,7 @@ bool _heartbeat_cb(void *data)
 
     for (std::map<int, CameraComponent *>::iterator it = server->compIdToObj.begin();
          it != server->compIdToObj.end(); it++) {
-        /* log_debug("Sending heartbeat for component :%d system_id:%d", it->first,
-                  server->_system_id);*/
+        log_debug("Sending heartbeat for component :%d system_id:%d", it->first, server->_system_id);
         mavlink_msg_heartbeat_pack(server->_system_id, it->first, &msg, MAV_TYPE_GENERIC,
                                    MAV_AUTOPILOT_INVALID, MAV_MODE_PREFLIGHT, 0, MAV_STATE_ACTIVE);
         if (!server->_send_mavlink_message(nullptr, msg))
@@ -987,7 +987,7 @@ bool _heartbeat_cb(void *data)
     if (!server->_send_mavlink_message(nullptr, msg)) {
         log_error("Sending HEARTBEAT Gimbal failed.");
     } else {
-        log_info("Sending HEARTBEAT Gimbal.");
+        log_debug("Sending HEARTBEAT Gimbal.");
 
     }
 

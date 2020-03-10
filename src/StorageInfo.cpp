@@ -10,11 +10,11 @@ StorageInfo::StorageInfo() {
     storage_id = 1;
     storage_count = 1;
     status = 2; /* ready */
-    capacity = 80000.0;
-    available = 40000.0;
-    used = 40000.0;
+    capacity = 8000.0;
+    available = 4000.0;
+    used = 4000.0;
     read_speed = 3000;
-    write_speed = 30000;
+    write_speed = 3000;
     updateInfo();
 }
 
@@ -43,7 +43,7 @@ void StorageInfo::updateInfo()
     // printf("free inodes for unprivileged users: f_favail: %lu\n", (unsigned long) vfs.f_favail);
     // printf("filesystem ID: f_fsid: %#lx\n",  (unsigned long) vfs.f_fsid);
 
-    long mb = 1024;
+    long mb = 1024*1024;
     long block_size = (long) vfs.f_bsize;
     long fragement_size = (long) vfs.f_frsize;
     unsigned long fragment_blocks = (unsigned long) vfs.f_blocks;
@@ -51,7 +51,7 @@ void StorageInfo::updateInfo()
 
     capacity = fragement_size * fragment_blocks / mb;
     available = block_size * free_blocks / mb;
-    used = (capacity-available);
+    used = capacity - available;
 
     cout << ".\tCapacity\tAvailable\tused\n" << storagePath << "\t" << capacity << "\t" << available << "\t" << used << " MB\n";
 
