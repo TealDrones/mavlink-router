@@ -236,7 +236,7 @@ int main(int argc, char **argv)
     parameter = new TiXmlElement("parameter");
     parameters->LinkEndChild(parameter);
 
-    parameter->SetAttribute("name", "camera-mode");
+    parameter->SetAttribute("name", "CAM_MODE");
     parameter->SetAttribute("type", "uint32");
     parameter->SetAttribute("default", "1");
     parameter->SetAttribute("control", "0");
