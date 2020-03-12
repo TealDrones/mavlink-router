@@ -223,10 +223,13 @@ int Endpoint::read_msg(struct buffer *pbuf, int *target_sysid, int *target_compi
          * Ground Station and Flight Stack. Although it can also be a
          * corrupted message is better forward than silent drop it.
          */
-        if (!_check_crc(msg_entry)) {
-            _stat.read.crc_error++;
-            _stat.read.crc_error_bytes += expected_size;
-            return 0;
+        /* don't check CRC of UDP packets for now */
+        if (strcmp( this->_name , "UDP") != 0) {
+            if (!_check_crc(msg_entry)) {
+                _stat.read.crc_error++;
+                _stat.read.crc_error_bytes += expected_size;
+                return 0;
+            }
         }
         _add_sys_comp_id(((uint16_t)*src_sysid << 8) | *src_compid);
     }
