@@ -57,7 +57,7 @@ CameraDevice::Status CameraDeviceV4l2::getInfo(struct CameraInfo &camInfo) const
     camInfo.resolution_h = 0;
     camInfo.resolution_v = 0;
     camInfo.lens_id = 0;
-    camInfo.flags = CAMERA_CAP_FLAGS_HAS_VIDEO_STREAM | CAMERA_CAP_FLAGS_CAPTURE_VIDEO | CAMERA_CAP_FLAGS_CAPTURE_IMAGE;
+    camInfo.flags = CAMERA_CAP_FLAGS_HAS_VIDEO_STREAM | CAMERA_CAP_FLAGS_CAPTURE_VIDEO | CAMERA_CAP_FLAGS_CAPTURE_IMAGE | CAMERA_CAP_FLAGS_HAS_BASIC_ZOOM | CAMERA_CAP_FLAGS_CAN_CAPTURE_IMAGE_IN_VIDEO_MODE | CAMERA_CAP_FLAGS_CAN_CAPTURE_VIDEO_IN_IMAGE_MODE;
 
     camInfo.cam_definition_version = 1;
     if (!mCamDefURI.empty()) {
