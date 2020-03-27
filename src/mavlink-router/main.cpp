@@ -35,7 +35,7 @@
 #include "endpoint.h"
 #include "mainloop.h"
 
-#define TEAL_VERSION "0.0.06"
+#define TEAL_VERSION "0.0.07"
 #define MAVLINK_TCP_PORT 5760
 #define DEFAULT_BAUDRATE 115200U
 #define DEFAULT_CONFFILE "/etc/mavlink-router/main.conf"
@@ -76,8 +76,8 @@ static const char* short_options = "he:rt:c:d:l:p:g:bvV";
 
 static void help(FILE *fp) {
     fprintf(fp,
-	    "Teal Version %s"
-            "%s [OPTIONS...] [<uart>|<udp_address>]\n\n"
+	    "Teal Version: %s\n"
+            "Usage: %s [OPTIONS...] [<uart>|<udp_address>]\n\n"
             "  <uart>                       UART device (<device>[:<baudrate>]) that will be routed\n"
             "  <udp_address>                UDP address (<ip>:<port>) that will be routed\n"
             "  -e --endpoint <ip[:port]>    Add UDP endpoint to communicate port is optional\n"
