@@ -35,7 +35,7 @@
 #include "endpoint.h"
 #include "mainloop.h"
 
-#define TEAL_VERSION "0.0.07"
+#define TEAL_VERSION "0.0.08"
 #define MAVLINK_TCP_PORT 5760
 #define DEFAULT_BAUDRATE 115200U
 #define DEFAULT_CONFFILE "/etc/mavlink-router/main.conf"
