@@ -1,4 +1,5 @@
 source /usr/local/rb3-oecore-x86_64/environment-setup-aarch64-oe-linux
+./configure CFLAGS='-g -O2' CXXFLAGS='-g -O2' --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib          --with-rootprefix=       --with-rootlibdir=/lib 
 ./autogen.sh && ./configure CFLAGS='-g -O2' \
         --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib64 \
     --prefix=/usr
