@@ -224,11 +224,15 @@ int Endpoint::read_msg(struct buffer *pbuf, int *target_sysid, int *target_compi
          * corrupted message is better forward than silent drop it.
          */
         /* don't check CRC of UDP packets for now */
-        if (strcmp( this->_name , "UDP") != 0) {
+        if (this->_name.compare("UDP") != 0) {
             if (!_check_crc(msg_entry)) {
                 _stat.read.crc_error++;
                 _stat.read.crc_error_bytes += expected_size;
                 return 0;
+            }
+        } else {
+            if (!_check_crc(msg_entry)) {
+                log_debug("UDP CRC issue %u", *msg_id);
             }
         }
         _add_sys_comp_id(((uint16_t)*src_sysid << 8) | *src_compid);
@@ -371,17 +375,21 @@ void Endpoint::postprocess_msg(int target_sysid, int target_compid, uint8_t src_
 
 bool Endpoint::_check_crc(const mavlink_msg_entry_t *msg_entry)
 {
+    log_info("_check_crc ");
+
     const bool mavlink2 = rx_buf.data[0] == MAVLINK_STX;
     uint16_t crc_msg, crc_calc;
     uint8_t payload_len, header_len, *payload;
 
     if (mavlink2) {
+        log_info("_check_crc mavlink2 ");
         struct mavlink_router_mavlink2_header *hdr =
                     (struct mavlink_router_mavlink2_header *)rx_buf.data;
         payload = rx_buf.data + sizeof(*hdr);
         header_len = sizeof(*hdr);
         payload_len = hdr->payload_len;
     } else {
+        log_info("_check_crc mavlink1 ");
         struct mavlink_router_mavlink1_header *hdr =
                     (struct mavlink_router_mavlink1_header *)rx_buf.data;
         payload = rx_buf.data + sizeof(*hdr);
@@ -393,6 +401,7 @@ bool Endpoint::_check_crc(const mavlink_msg_entry_t *msg_entry)
     crc_calc = crc_calculate(&rx_buf.data[1], header_len + payload_len - 1);
     crc_accumulate(msg_entry->crc_extra, &crc_calc);
     if (crc_calc != crc_msg) {
+        log_info("_check_crc calc:%d message:%d", crc_calc, crc_msg);
         return false;
     }
 
