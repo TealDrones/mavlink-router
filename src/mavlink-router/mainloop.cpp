@@ -317,7 +317,7 @@ int Mainloop::run_single(int timeout_msec)
         return 0;
     }
     for (int i = 0; i < r; i++) {
-        if (events[i].data.ptr == &_pipefd) {
+        if (events[i].data.ptr == &_pipefd && !get_should_ignore_pipe()) {
             _handle_pipe();
             continue;
         }

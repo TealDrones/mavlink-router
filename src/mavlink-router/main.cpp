@@ -35,7 +35,7 @@
 #include "endpoint.h"
 #include "mainloop.h"
 
-#define TEAL_VERSION "0.0.09a"
+#define TEAL_VERSION "0.0.10"
 #define MAVLINK_TCP_PORT 5760
 #define DEFAULT_BAUDRATE 115200U
 #define DEFAULT_CONFFILE "/etc/mavlink-router/main.conf"
@@ -54,13 +54,15 @@ static struct options opt = {
     .mavlink_dialect = Auto,
     .min_free_space = 0,
     .max_log_files = 0,
-    .heartbeat = false
+    .heartbeat = false,
+    .ignore_pipe = false
 };
 
 static const struct option long_options[] = {
     { "endpoints",              required_argument,  NULL,   'e' },
     { "conf-file",              required_argument,  NULL,   'c' },
     { "conf-dir" ,              required_argument,  NULL,   'd' },
+    { "ignore-pipe",            no_argument,        NULL,   'i' },
     { "report_msg_statistics",  no_argument,        NULL,   'r' },
     { "tcp-port",               required_argument,  NULL,   't' },
     { "tcp-endpoint",           required_argument,  NULL,   'p' },
@@ -72,7 +74,7 @@ static const struct option long_options[] = {
     { }
 };
 
-static const char* short_options = "he:rt:c:d:l:p:g:bvV";
+static const char* short_options = "he:rt:c:d:l:p:g:bvVi";
 
 static void help(FILE *fp) {
     fprintf(fp,
@@ -93,6 +95,7 @@ static void help(FILE *fp) {
             "  -c --conf-file <file>        .conf file with configurations for mavlink-router.\n"
             "  -d --conf-dir <dir>          Directory where to look for .conf files overriding\n"
             "                               default conf file.\n"
+            "  -i --ignore-pipe             Ignore all piped messages (i.e. dynamic endpoints)\n"
             "  -l --log <directory>         Enable Flight Stack logging\n"
             "  -g --debug-log-level <level> Set debug log level. Levels are\n"
             "                               <error|warning|info|debug>\n"
@@ -481,6 +484,9 @@ static int parse_argv(int argc, char *argv[])
             free(ip);
             break;
         }
+        case 'i':
+            opt.ignore_pipe = true;
+            break;
         case 'c':
         case 'd':
         case 'V':
@@ -920,6 +926,8 @@ int main(int argc, char *argv[])
 
     if (!mainloop.add_endpoints(mainloop, &opt))
         goto endpoint_error;
+    
+    mainloop.set_ignore_pipe(opt.ignore_pipe);
 
     mainloop.loop();
 

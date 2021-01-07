@@ -86,6 +86,10 @@ public:
     bool remove_dynamic_endpoint(const dynamic_command& command);
     bool remove_dynamic_endpoint(Endpoint *endpoint);
 
+    inline bool get_should_ignore_pipe() {return _ignore_pipe;}
+
+    inline void set_ignore_pipe(bool ignore){_ignore_pipe = ignore;}
+
     void print_statistics();
 
     int epollfd = -1;
@@ -150,6 +154,8 @@ private:
     bool _log_aggregate_timeout(void *data);
     void _handle_pipe();
 
+    bool _ignore_pipe{false};
+
     static Mainloop* instance;
 };
 
@@ -207,4 +213,5 @@ struct options {
     unsigned long min_free_space;
     unsigned long max_log_files;
     bool heartbeat;
+    bool ignore_pipe;
 };
