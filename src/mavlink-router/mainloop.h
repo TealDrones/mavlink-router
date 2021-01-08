@@ -56,6 +56,7 @@ public:
 
     ~Mainloop();
 
+    void start_fifo();
     int add_fd(int fd, void *data, int events);
     int mod_fd(int fd, void *data, int events);
     int remove_fd(int fd);
@@ -85,10 +86,6 @@ public:
     bool add_dynamic_endpoint(const dynamic_command& command);
     bool remove_dynamic_endpoint(const dynamic_command& command);
     bool remove_dynamic_endpoint(Endpoint *endpoint);
-
-    inline bool get_should_ignore_pipe() {return _ignore_pipe;}
-
-    inline void set_ignore_pipe(bool ignore){_ignore_pipe = ignore;}
 
     void print_statistics();
 
@@ -154,8 +151,6 @@ private:
     bool _log_aggregate_timeout(void *data);
     void _handle_pipe();
 
-    bool _ignore_pipe{false};
-
     static Mainloop* instance;
 };
 
@@ -213,5 +208,5 @@ struct options {
     unsigned long min_free_space;
     unsigned long max_log_files;
     bool heartbeat;
-    bool ignore_pipe;
+    bool use_pipe;
 };

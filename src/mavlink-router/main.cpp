@@ -55,7 +55,7 @@ static struct options opt = {
     .min_free_space = 0,
     .max_log_files = 0,
     .heartbeat = false,
-    .ignore_pipe = false
+    .use_pipe = true
 };
 
 static const struct option long_options[] = {
@@ -393,6 +393,7 @@ static bool pre_parse_argv(int argc, char *argv[])
         }
         case 'V':
             puts(PACKAGE " version " VERSION);
+            puts(PACKAGE " Teal version " TEAL_VERSION);
             return false;
         }
     }
@@ -485,7 +486,7 @@ static int parse_argv(int argc, char *argv[])
             break;
         }
         case 'i':
-            opt.ignore_pipe = true;
+            opt.use_pipe = false;
             break;
         case 'c':
         case 'd':
@@ -924,11 +925,14 @@ int main(int argc, char *argv[])
     if (opt.tcp_port == ULONG_MAX)
         opt.tcp_port = MAVLINK_TCP_PORT;
 
+    if (opt.use_pipe)
+        mainloop.start_fifo();
+    else
+        log_info("Ignoring pipe");
+
     if (!mainloop.add_endpoints(mainloop, &opt))
         goto endpoint_error;
     
-    mainloop.set_ignore_pipe(opt.ignore_pipe);
-
     mainloop.loop();
 
     free_endpoints_options_strings(&opt);
