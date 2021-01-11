@@ -35,7 +35,7 @@
 #include "endpoint.h"
 #include "mainloop.h"
 
-#define TEAL_VERSION "0.0.10"
+#define TEAL_VERSION "0.0.10a"
 #define MAVLINK_TCP_PORT 5760
 #define DEFAULT_BAUDRATE 115200U
 #define DEFAULT_CONFFILE "/etc/mavlink-router/main.conf"
@@ -925,8 +925,10 @@ int main(int argc, char *argv[])
     if (opt.tcp_port == ULONG_MAX)
         opt.tcp_port = MAVLINK_TCP_PORT;
 
-    if (opt.use_pipe)
+    if (opt.use_pipe) {
+        log_info("Seting up pipe");
         mainloop.start_fifo();
+    }
     else
         log_info("Ignoring pipe");
 
