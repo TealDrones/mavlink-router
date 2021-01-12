@@ -926,7 +926,7 @@ int main(int argc, char *argv[])
         opt.tcp_port = MAVLINK_TCP_PORT;
 
     if (opt.use_pipe) {
-        log_info("Seting up pipe");
+        log_info("Setting up pipe");
         mainloop.start_fifo();
     }
     else
