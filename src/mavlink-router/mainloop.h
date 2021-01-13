@@ -56,6 +56,7 @@ public:
 
     ~Mainloop();
 
+    void start_fifo();
     int add_fd(int fd, void *data, int events);
     int mod_fd(int fd, void *data, int events);
     int remove_fd(int fd);
@@ -207,4 +208,5 @@ struct options {
     unsigned long min_free_space;
     unsigned long max_log_files;
     bool heartbeat;
+    bool use_pipe;
 };

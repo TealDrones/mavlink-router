@@ -53,6 +53,11 @@ Mainloop::Mainloop()
         throw std::runtime_error(std::string("epoll_create: ") + strerror(errno));
     }
 
+    instance = this;
+}
+
+void Mainloop::start_fifo()
+{
     // XXX: this is bad for testing/multi-instantiation.
     if (mkfifo(pipe_path, 0777) == -1 && errno != EEXIST) {
         throw std::runtime_error(std::string("mkfifo: ") + strerror(errno));
@@ -63,8 +68,6 @@ Mainloop::Mainloop()
         throw std::runtime_error(std::string("open pipe: ") + strerror(errno));
     }
     add_fd(_pipefd, &_pipefd, EPOLLIN);
-
-    instance = this;
 }
 
 Mainloop::~Mainloop()

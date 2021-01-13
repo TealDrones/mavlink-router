@@ -1,4 +1,3 @@
-#source /usr/local/rb3-oecore-x86_64/environment-setup-aarch64-oe-linux
 source /usr/local/teal-oecore-x86_64/environment-setup-aarch64-oe-linux
 
 ./autogen.sh
